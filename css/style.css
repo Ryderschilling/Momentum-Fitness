@@ -144,6 +144,7 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
   gap: 0.6rem;
   padding: 1.05rem 2rem;
   font-size: 0.78rem;
+  line-height: 1.15;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -159,7 +160,7 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
 .btn--line:hover { border-color: var(--txt); background: rgba(21, 22, 27, 0.04); }
 .light .btn--line { color: var(--dtxt); border-color: rgba(25,28,46,0.35); }
 .light .btn--line:hover { border-color: var(--dtxt); }
-.btn-row { display: flex; flex-wrap: wrap; align-items: center; }
+.btn-row { display: flex; flex-wrap: wrap; align-items: stretch; }
 .btn-row .btn + .btn { margin-left: -1px; }
 
 /* ------------------------------ Nav */
@@ -315,11 +316,14 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
 
 /* ------------------------------ Hero (home): full-bleed photo */
 .hero {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  height: 100svh;
   min-height: 100svh;
   display: flex;
-  align-items: flex-end;
-  padding: 7rem 0 clamp(3rem, 7vh, 5.5rem);
+  align-items: center;
+  padding: 7rem 0 clamp(2.5rem, 6vh, 4.5rem);
   overflow: clip;
   background: var(--deep);
 }
@@ -333,8 +337,8 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
 .hero__scrim {
   position: absolute; inset: 0; z-index: 1;
   background:
-    linear-gradient(94deg, rgba(11, 12, 16, 0.86) 2%, rgba(11, 12, 16, 0.52) 38%, rgba(11, 12, 16, 0.22) 70%, rgba(11, 12, 16, 0.38) 100%),
-    linear-gradient(to bottom, rgba(11, 12, 16, 0.62) 0%, rgba(11, 12, 16, 0.12) 26%, rgba(11, 12, 16, 0.20) 58%, rgba(11, 12, 16, 0.86) 100%);
+    radial-gradient(78% 70% at 50% 50%, rgba(11, 12, 16, 0.82) 0%, rgba(11, 12, 16, 0.68) 44%, rgba(11, 12, 16, 0.34) 74%, rgba(11, 12, 16, 0.06) 100%),
+    linear-gradient(to bottom, rgba(11, 12, 16, 0.58) 0%, rgba(11, 12, 16, 0.14) 24%, rgba(11, 12, 16, 0.22) 60%, rgba(11, 12, 16, 0.86) 100%);
 }
 .hero__content {
   position: relative; z-index: 2;
@@ -344,7 +348,9 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
   --border: rgba(255, 255, 255, 0.24);
   color: #fff;
 }
-.hero__content h1 { color: #fff; max-width: 12ch; margin: 1.4rem 0 1.5rem; }
+.hero__content { text-align: center; width: 100%; }
+.hero__content .eyebrow { justify-content: center; }
+.hero__content h1 { color: #fff; max-width: 14ch; margin: 1.5rem auto 1.6rem; }
 .hero__content h1 em {
   font-style: normal;
   background: linear-gradient(100deg, #FFA524 0%, #FF4E68 52%, #C158B8 100%);
@@ -353,14 +359,16 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
   color: transparent;
 }
 .hero__content .eyebrow { color: #FFB05C; }
-.hero__sub { max-width: 46ch; color: #DAD8D3; margin-bottom: 2.2rem; }
+.hero__sub { max-width: 48ch; color: #DAD8D3; margin: 0 auto 2.4rem; }
+.hero .btn-row { justify-content: center; }
 .hero__content .btn--line { color: #fff; border-color: rgba(255, 255, 255, 0.45); }
 .hero__content .btn--line:hover { border-color: #fff; background: rgba(255, 255, 255, 0.1); }
 .hero__meta {
-  margin-top: 2.4rem;
+  margin: 2.6rem auto 0;
   padding-top: 1.5rem;
+  max-width: 46rem;
   border-top: 1px solid rgba(255, 255, 255, 0.22);
-  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 2.2rem;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6rem 2.2rem;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -383,75 +391,120 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
 .nav-drawer.is-open ~ .nav .nav__burger span,
 .nav__burger.is-open span { background: var(--txt); }
 
-/* ------------------------------ The Best Hour of Your Day */
-.hour { padding: 0; background: var(--ink); }
+/* Everything after the hero rides over the top of it. Each section must be
+   opaque or the hero shows through. */
+main > section:not(.hero) { position: relative; z-index: 1; }
+.sched { background: var(--ink); }
+
+/* ------------------------------ The Best Hour of Your Day
+   The photo card holds. The clock and the copy walk past it. Pure sticky,
+   one markup for every screen, no pinning. */
+.hour { padding: 0 0 clamp(4rem, 9vw, 8rem); background: var(--ink); }
 .hour__intro { padding: clamp(5rem, 9vw, 8rem) 0 clamp(2rem, 4vw, 3.5rem); }
-.hour__stage-outer { position: relative; }
+
 .hour__stage {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
-  min-height: 100svh;
-  padding: 4.5rem 0 3rem;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
 }
-.hour__clockside { display: flex; flex-direction: column; gap: 1.6rem; }
-.hour__clock {
+
+/* left: the hour walking past */
+.hour__steps { display: flex; flex-direction: column; }
+.hour__step {
+  min-height: 78svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.28;
+  transition: opacity 0.65s var(--ease);
+}
+.hour__step.is-on { opacity: 1; }
+.hour__min {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(4.6rem, 12vw, 11rem);
-  line-height: 0.9;
+  font-size: clamp(4rem, 10vw, 9rem);
+  line-height: 0.8;
   letter-spacing: 0.004em;
   background: var(--sunset-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   font-variant-numeric: tabular-nums;
+  margin-bottom: 1.1rem;
 }
-.hour__clock-label {
-  font-size: 0.78rem; font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--txt-3);
-}
-.hour__rail { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.6rem; }
-.hour__rail button {
-  display: flex; align-items: center; gap: 0.9rem;
-  font-size: 0.8rem; font-weight: 600;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--txt-3);
-  min-height: 32px;
-  text-align: left;
-  transition: color 0.3s;
-  touch-action: manipulation;
-}
-.hour__rail button::before {
-  content: '';
-  width: 18px; height: 2px;
-  background: var(--txt-3);
-  transition: width 0.35s var(--ease), background 0.35s;
-  flex: none;
-}
-.hour__rail button.is-on { color: var(--txt); }
-.hour__rail button.is-on::before { width: 34px; background: var(--accent); }
-.hour__frames { position: relative; aspect-ratio: 4 / 4.6; max-height: 74svh; }
-.hour__frame {
-  position: absolute; inset: 0;
-  opacity: 0;
-  transform: translateY(24px) scale(0.985);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
-  pointer-events: none;
+.hour__step h3 { margin-bottom: 0.7rem; }
+.hour__step p { color: var(--txt-2); max-width: 42ch; }
+
+/* right: the card that stays */
+.hour__card {
+  position: sticky;
+  top: 0;
+  height: 100svh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 1.6rem;
+}
+.hour__frames {
+  position: relative;
+  aspect-ratio: 4 / 4.1;
+  max-height: 70svh;
+}
+.hour__frame {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.012);
+  transition: opacity 0.8s var(--ease), transform 1.2s var(--ease);
+  pointer-events: none;
 }
 .hour__frame.is-on { opacity: 1; transform: none; pointer-events: auto; }
-.hour__frame .ph { flex: 1; }
-.hour__caption { padding: 1.5rem 0 0; }
-.hour__caption h3 { margin-bottom: 0.5rem; }
-.hour__caption h3 span { color: var(--accent); margin-right: 0.7rem; font-variant-numeric: tabular-nums; }
-.hour__caption p { color: var(--txt-2); max-width: 52ch; }
+.hour__frame .ph { position: absolute; inset: 0; }
 
-/* Mobile flow version (no pin) */
-.hour__steps { display: none; }
+.hour__rail { display: flex; gap: 0; border-top: 1px solid var(--border); }
+.hour__rail button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: flex-start;
+  padding: 0.9rem 0.5rem 0.2rem 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--txt-3);
+  text-align: left;
+  min-height: 44px;
+  position: relative;
+  transition: color 0.35s var(--ease);
+  touch-action: manipulation;
+}
+.hour__rail-m {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.hour__rail-l { display: block; }
+.hour__rail button::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 0; right: 2px;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+.hour__rail button.is-on { color: var(--txt); }
+.hour__rail button.is-on::before { transform: scaleX(1); }
+
+.motion-off .hour__step, .no-js .hour__step { opacity: 1; }
+.motion-off .hour__frame, .no-js .hour__frame { opacity: 1; position: relative; }
 
 /* ------------------------------ What a class is */
 .classdemo .grid {
@@ -510,20 +563,40 @@ p  { font-size: clamp(0.98rem, 1.15vw, 1.08rem); }
 .coach__role { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 .coach__certs { margin-top: 0.7rem; font-size: 0.83rem; color: var(--txt-2); line-height: 1.5; }
 
-/* ------------------------------ New here doors */
-.doors { background: var(--sand); }
-.doors__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 3rem; }
+/* ------------------------------ New here doors
+   The headline holds while the three cards stack up under it. */
+.doors { background: var(--sand); padding-bottom: clamp(5rem, 10vw, 9rem); }
+.doors__grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+}
+.doors__head {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.doors__head .sub { max-width: 30ch; }
+.doors__stack { display: flex; flex-direction: column; gap: clamp(1.5rem, 4vh, 3rem); }
 .door {
+  position: sticky;
+  top: calc(16svh + var(--i) * 3.2rem);
   border: 1px solid var(--dborder);
   background: #fff;
-  padding: 2.2rem 1.9rem 2.1rem;
+  padding: 2.4rem 2.1rem 2.2rem;
   display: flex; flex-direction: column; gap: 1rem;
-  transition: transform 0.45s var(--ease), border-color 0.3s;
+  min-height: 40svh;
+  box-shadow: 0 -1px 0 var(--dborder), 0 24px 50px -30px rgba(21, 22, 27, 0.35);
+  transition: border-color 0.3s;
 }
-.door:hover { transform: translateY(-6px); border-color: var(--accent); }
+.door:hover { border-color: var(--accent); }
 .door__tag { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
-.door h3 { font-size: 1.5rem; }
-.door p { font-size: 0.95rem; flex: 1; }
+.door h3 { font-size: clamp(1.5rem, 2.4vw, 2rem); }
+.door p { font-size: 0.98rem; flex: 1; max-width: 44ch; }
 .door .btn { align-self: flex-start; }
 
 /* ------------------------------ Schedule */
@@ -824,6 +897,19 @@ a.ccard:hover { border-color: var(--accent); }
 .footer__bottom a { color: var(--txt-2); }
 .footer__bottom a:hover { color: var(--txt); }
 
+/* ------------------------------ Headline resolve, character by character */
+.sr-word { display: inline-block; white-space: nowrap; }
+.sr-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.42em);
+  transition:
+    opacity 0.62s var(--ease) var(--d, 0ms),
+    transform 0.82s var(--ease) var(--d, 0ms);
+}
+.is-lit .sr-char { opacity: 1; transform: none; }
+.motion-off .sr-char, .no-js .sr-char { opacity: 1; transform: none; }
+
 /* ------------------------------ Reveal system (auto-tagged in JS) */
 [data-rv] {
   opacity: 0;
@@ -860,29 +946,49 @@ a.ccard:hover { border-color: var(--accent); }
   .nav__logo img, .nav.is-scrolled .nav__logo img { height: 46px; }
   .footer .nav__logo img { height: 54px; }
 
-  .hour__stage { display: none; }
-  .hour__steps { display: flex; flex-direction: column; gap: 2.6rem; padding-bottom: 5rem; }
-  .hstep { border: 1px solid var(--border); background: var(--ink-2); }
-  .hero { min-height: 92svh; padding-top: 6rem; }
+  .hero { height: 92svh; min-height: 92svh; padding-top: 6rem; }
   .hero__media img { object-position: 52% 46%; }
   .hero__scrim {
     background:
-      linear-gradient(to bottom, rgba(11,12,16,0.78) 0%, rgba(11,12,16,0.30) 20%, rgba(11,12,16,0.72) 56%, rgba(11,12,16,0.95) 100%),
-      linear-gradient(rgba(11,12,16,0.28), rgba(11,12,16,0.28));
+      radial-gradient(96% 46% at 50% 46%, rgba(11,12,16,0.72) 0%, rgba(11,12,16,0.42) 55%, rgba(11,12,16,0.10) 100%),
+      linear-gradient(to bottom, rgba(11,12,16,0.74) 0%, rgba(11,12,16,0.26) 20%, rgba(11,12,16,0.62) 58%, rgba(11,12,16,0.94) 100%),
+      linear-gradient(rgba(11,12,16,0.22), rgba(11,12,16,0.22));
   }
-  .hstep .ph { aspect-ratio: 4 / 3; }
-  .hstep__body { padding: 1.5rem 1.4rem 1.7rem; }
-  .hstep__min {
-    font-family: var(--font-display); font-weight: 800;
-    font-size: 2rem; line-height: 1;
-    background: var(--sunset-text);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    display: inline-block; margin-bottom: 0.6rem;
-  }
-  .hstep__body h3 { margin-bottom: 0.4rem; }
-  .hstep__body p { color: var(--txt-2); font-size: 0.95rem; }
+  .hero__meta { justify-content: flex-start; text-align: left; }
+  .hero .btn-row { align-items: stretch; }
 
-  .doors__grid, .reviews__grid, .offers { grid-template-columns: 1fr; }
+  /* the card holds at the top of the screen, the hour scrolls under it */
+  .hour__stage { grid-template-columns: 1fr; gap: 1.6rem; }
+  .hour__card {
+    order: -1;
+    top: 4.4rem;
+    height: auto;
+    gap: 0.9rem;
+    padding-bottom: 0.9rem;
+    background: var(--ink);
+    z-index: 2;
+  }
+  .hour__frames { aspect-ratio: 4 / 3; max-height: 42svh; }
+  /* numbers only, the labels never fit five across on a phone */
+  .hour__rail { gap: 0.4rem; }
+  .hour__rail button { padding: 0.7rem 0 0.2rem; align-items: center; }
+  .hour__rail-l { display: none; }
+  .hour__rail-m { font-size: 1rem; }
+  .hour__rail button::before { right: 0; }
+  .hour__step { min-height: 50svh; padding: 1.5rem 0; }
+  .hour__min { font-size: clamp(3.4rem, 18vw, 5.4rem); }
+
+  /* cards stack under a headline that scrolls normally */
+  .doors__grid { grid-template-columns: 1fr; gap: 2rem; }
+  .doors__head { position: static; height: auto; }
+  .door {
+    position: sticky;
+    top: calc(5.2rem + var(--i) * 3rem);
+    min-height: 0;
+    padding: 1.1rem 1.4rem 1.8rem;
+  }
+
+  .reviews__grid, .offers { grid-template-columns: 1fr; }
   .sched__grid, .contact__grid { grid-template-columns: 1fr; }
   .fsplit { grid-template-columns: 1fr; }
   .fsplit__media, .fsplit--flip .fsplit__media { order: 0; min-height: 46svh; }

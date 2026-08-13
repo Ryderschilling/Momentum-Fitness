@@ -113,45 +113,109 @@ const INTEGRATIONS = {
 
   /* ------------------------------ The Best Hour: pinned scrub (desktop) */
   const stage = document.getElementById('hourStage');
-  if (stage && hasGsap && !reduceMotion && isDesktop()) {
-    const clock = document.getElementById('hourClock');
+  if (stage) {
+    const steps = [...document.querySelectorAll('#hourSteps .hour__step')];
     const frames = [...document.querySelectorAll('#hourFrames .hour__frame')];
     const railBtns = [...document.querySelectorAll('#hourRail button')];
-    const marks = [0, 10, 25, 40, 55]; // minute each phase starts
-    let current = 0;
+    let current = -1;
 
     const setPhase = (i) => {
-      if (i === current) return;
+      if (i === current || i < 0) return;
       current = i;
+      steps.forEach((s2, k) => s2.classList.toggle('is-on', k === i));
       frames.forEach((f, k) => f.classList.toggle('is-on', k === i));
-      railBtns.forEach((b, k) => b.classList.toggle('is-on', k === i));
+      railBtns.forEach((b2, k) => b2.classList.toggle('is-on', k === i));
+    };
+    setPhase(0);
+
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      // whichever block of copy owns the middle band picks the photo
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) setPhase(steps.indexOf(e.target)); });
+      }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
+      steps.forEach((s2) => io.observe(s2));
+    } else {
+      steps.forEach((s2) => s2.classList.add('is-on'));
+      frames.forEach((f) => f.classList.add('is-on'));
+    }
+
+    // rail jumps to that part of the hour
+    railBtns.forEach((b2, i) => {
+      b2.addEventListener('click', () => {
+        const target = steps[i];
+        if (!target) return;
+        const y = target.getBoundingClientRect().top + window.scrollY
+                  - Math.max(0, (window.innerHeight - target.offsetHeight) / 2);
+        if (lenis) lenis.scrollTo(y, { duration: 1 });
+        else window.scrollTo({ top: y, behavior: 'smooth' });
+      });
+    });
+  }
+
+  /* ------------------------------ Headlines resolve character by character
+     Splits text nodes only, so <em> and <br> survive. <em> stays whole
+     because background-clip:text breaks the moment its letters get their
+     own transforms. */
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    const STEP = 17;   // ms between letters
+    const CAP = 620;   // never stagger longer than this
+
+    const splitNode = (node, out, state) => {
+      if (node.nodeType === 3) {
+        node.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { out.appendChild(document.createTextNode(part)); return; }
+          const word = document.createElement('span');
+          word.className = 'sr-word';
+          [...part].forEach((ch) => {
+            const c = document.createElement('span');
+            c.className = 'sr-char';
+            c.style.setProperty('--d', Math.min(state.i * STEP, CAP) + 'ms');
+            c.textContent = ch;
+            state.i++;
+            word.appendChild(c);
+          });
+          out.appendChild(word);
+        });
+        return;
+      }
+      if (node.nodeType !== 1) return;
+      if (node.tagName === 'BR') { out.appendChild(node.cloneNode(false)); return; }
+      if (node.tagName === 'EM') {
+        const em = node.cloneNode(false);
+        em.className = (em.className ? em.className + ' ' : '') + 'sr-char';
+        em.style.setProperty('--d', Math.min(state.i * STEP, CAP) + 'ms');
+        em.textContent = node.textContent;
+        state.i += Math.max(3, Math.round(node.textContent.length / 2));
+        out.appendChild(em);
+        return;
+      }
+      const clone = node.cloneNode(false);
+      [...node.childNodes].forEach((k) => splitNode(k, clone, state));
+      out.appendChild(clone);
     };
 
-    const st = ScrollTrigger.create({
-      trigger: stage,
-      // This one pins, so it must be measured before anything below it,
-      // or every later trigger lands 2600px too high. See BUILD-NOTES.
-      refreshPriority: 10,
-      start: 'top top',
-      end: '+=2600',
-      pin: true,
-      scrub: 0.4,
-      onUpdate: (self) => {
-        const minute = Math.min(60, Math.round(self.progress * 60));
-        if (clock) clock.textContent = ':' + String(minute).padStart(2, '0');
-        let phase = 0;
-        for (let i = 0; i < marks.length; i++) if (minute >= marks[i]) phase = i;
-        setPhase(phase);
-      },
-    });
-
-    // Rail buttons jump the scroll to that minute
-    railBtns.forEach((b, i) => {
-      b.addEventListener('click', () => {
-        const target = st.start + ((marks[i] + 1.5) / 60) * (st.end - st.start);
-        if (lenis) lenis.scrollTo(target, { duration: 1 });
-        else window.scrollTo({ top: target, behavior: 'smooth' });
+    const lit = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-lit');
+        lit.unobserve(e.target);
       });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    document.querySelectorAll('h1, h2').forEach((h) => {
+      if (h.dataset.srDone || !h.textContent.trim()) return;
+      const label = h.textContent.replace(/\s+/g, ' ').trim();
+      const holder = document.createElement('span');
+      const state = { i: 0 };
+      [...h.childNodes].forEach((k) => splitNode(k, holder, state));
+      holder.setAttribute('aria-hidden', 'true');
+      h.setAttribute('aria-label', label);
+      h.textContent = '';
+      h.appendChild(holder);
+      h.dataset.srDone = '1';
+      h.dataset.rvSeen = '1';   // keep the generic reveal system off these
+      lit.observe(h);
     });
   }
 
@@ -164,6 +228,9 @@ const INTEGRATIONS = {
 
   const tag = (el, delay) => {
     if (el.dataset.rvSeen || el.hasAttribute('data-hero')) return;
+    // Anything sticky already has its own motion. Fading it in means you can
+    // see straight through it to the card underneath while it animates.
+    if (getComputedStyle(el).position === 'sticky') return;
     el.dataset.rvSeen = '1';
     el.setAttribute('data-rv', '');
     if (delay) el.style.setProperty('--rv-d', delay.toFixed(2) + 's');

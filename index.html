@@ -138,107 +138,49 @@
         <p class="lead sub" style="margin-top:1.4rem;">"Get fit, make it the best hour of your day, stay safe, turn up the music, high five some people." That is our actual mission statement. Here is how it plays out, minute by minute.</p>
       </div>
 
-      <!-- Desktop: pinned, scroll-scrubbed -->
-      <div class="hour__stage-outer" id="hourStage">
-        <div class="wrap hour__stage">
-          <div class="hour__clockside">
-            <div>
-              <div class="hour__clock" id="hourClock">:00</div>
-              <div class="hour__clock-label">One class, sixty minutes</div>
-            </div>
-            <div class="hour__rail" id="hourRail" aria-label="Class timeline">
-              <button data-i="0" class="is-on">The whiteboard</button>
-              <button data-i="1">The warm-up</button>
-              <button data-i="2">Strength</button>
-              <button data-i="3">The workout</button>
-              <button data-i="4">High fives</button>
-            </div>
-          </div>
-          <div class="hour__frames" id="hourFrames">
-            <div class="hour__frame is-on">
-              <!-- PHOTO 02: coach at the whiteboard, class gathered around -->
-              <div class="ph"><span class="ph__chip"><b>Photo 02</b> Coach at the whiteboard, class gathered</span></div>
-              <div class="hour__caption">
-                <h3><span>:00</span>The whiteboard</h3>
-                <p>You walk in, drop your keys, and a coach talks the whole room through today's plan. You do not need to know what any of the words mean yet. That is their job.</p>
-              </div>
-            </div>
-            <div class="hour__frame">
-              <!-- PHOTO 03: warm-up, people on rowers and bikes, mid-laugh if possible -->
-              <div class="ph"><span class="ph__chip"><b>Photo 03</b> Warm-up: rowers, bikes, people laughing</span></div>
-              <div class="hour__caption">
-                <h3><span>:10</span>The warm-up</h3>
-                <p>Music goes up. Everyone moves together: rowers, bikes, stretching. Bad dance moves are optional but encouraged.</p>
-              </div>
-            </div>
-            <div class="hour__frame">
-              <!-- PHOTO 04: barbell work, coach adjusting someone's form -->
-              <div class="ph"><span class="ph__chip"><b>Photo 04</b> Barbell work, coach correcting form</span></div>
-              <div class="hour__caption">
-                <h3><span>:25</span>Strength</h3>
-                <p>Barbells, dumbbells, or skill work with a coach watching your form the entire time. Every weight scales, including the empty bar. Nobody starts heavy.</p>
-              </div>
-            </div>
-            <div class="hour__frame">
-              <!-- PHOTO 05: the WOD, peak effort, chalk in the air, big energy -->
-              <div class="ph"><span class="ph__chip"><b>Photo 05</b> The workout: peak effort, big energy</span></div>
-              <div class="hour__caption">
-                <h3><span>:40</span>The workout</h3>
-                <p>The sweaty, fun part: usually 8 to 20 minutes where the playlist earns its paycheck. Finish first or finish last, the room cheers either way.</p>
-              </div>
-            </div>
-            <div class="hour__frame">
-              <!-- PHOTO 06: high fives / fist bumps after class, smiles -->
-              <div class="ph"><span class="ph__chip"><b>Photo 06</b> High fives and fist bumps after class</span></div>
-              <div class="hour__caption">
-                <h3><span>:55</span>High fives</h3>
-                <p>Fist bumps, high fives, and a weirdly great mood for the rest of the day. See you tomorrow.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile: same story, normal flow -->
-      <div class="wrap hour__steps">
-        <div class="hstep">
-          <div class="ph"><span class="ph__chip"><b>Photo 02</b> Coach at the whiteboard</span></div>
-          <div class="hstep__body">
-            <span class="hstep__min">:00</span>
+      <!-- The card holds. The clock and the copy walk past it on the left. -->
+      <div class="wrap wrap--wide hour__stage" id="hourStage">
+        <div class="hour__steps" id="hourSteps">
+          <article class="hour__step" data-i="0">
+            <div class="hour__min">:00</div>
             <h3>The whiteboard</h3>
             <p>You walk in, drop your keys, and a coach talks the whole room through today's plan. You do not need to know what any of the words mean yet. That is their job.</p>
-          </div>
-        </div>
-        <div class="hstep">
-          <div class="ph"><span class="ph__chip"><b>Photo 03</b> Warm-up on rowers and bikes</span></div>
-          <div class="hstep__body">
-            <span class="hstep__min">:10</span>
+          </article>
+          <article class="hour__step" data-i="1">
+            <div class="hour__min">:10</div>
             <h3>The warm-up</h3>
             <p>Music goes up. Everyone moves together: rowers, bikes, stretching. Bad dance moves are optional but encouraged.</p>
-          </div>
-        </div>
-        <div class="hstep">
-          <div class="ph"><span class="ph__chip"><b>Photo 04</b> Barbell work with a coach</span></div>
-          <div class="hstep__body">
-            <span class="hstep__min">:25</span>
+          </article>
+          <article class="hour__step" data-i="2">
+            <div class="hour__min">:25</div>
             <h3>Strength</h3>
-            <p>Barbells, dumbbells, or skill work with a coach watching your form the entire time. Every weight scales, including the empty bar.</p>
-          </div>
-        </div>
-        <div class="hstep">
-          <div class="ph"><span class="ph__chip"><b>Photo 05</b> The workout, peak effort</span></div>
-          <div class="hstep__body">
-            <span class="hstep__min">:40</span>
+            <p>Barbells, dumbbells, or skill work with a coach watching your form the entire time. Every weight scales, including the empty bar. Nobody starts heavy.</p>
+          </article>
+          <article class="hour__step" data-i="3">
+            <div class="hour__min">:40</div>
             <h3>The workout</h3>
-            <p>The sweaty, fun part: usually 8 to 20 minutes where the playlist earns its paycheck. The room cheers either way.</p>
-          </div>
-        </div>
-        <div class="hstep">
-          <div class="ph"><span class="ph__chip"><b>Photo 06</b> High fives after class</span></div>
-          <div class="hstep__body">
-            <span class="hstep__min">:55</span>
+            <p>The sweaty, fun part: usually 8 to 20 minutes where the playlist earns its paycheck. Finish first or finish last, the room cheers either way.</p>
+          </article>
+          <article class="hour__step" data-i="4">
+            <div class="hour__min">:55</div>
             <h3>High fives</h3>
             <p>Fist bumps, high fives, and a weirdly great mood for the rest of the day. See you tomorrow.</p>
+          </article>
+        </div>
+        <div class="hour__card">
+          <div class="hour__frames" id="hourFrames">
+            <div class="hour__frame is-on"><div class="ph"><span class="ph__chip"><b>Photo 02</b> Coach at the whiteboard, class gathered</span></div></div>
+            <div class="hour__frame"><div class="ph"><span class="ph__chip"><b>Photo 03</b> Warm-up: rowers, bikes, people laughing</span></div></div>
+            <div class="hour__frame"><div class="ph"><span class="ph__chip"><b>Photo 04</b> Barbell work, coach correcting form</span></div></div>
+            <div class="hour__frame"><div class="ph"><span class="ph__chip"><b>Photo 05</b> The workout: peak effort, big energy</span></div></div>
+            <div class="hour__frame"><div class="ph"><span class="ph__chip"><b>Photo 06</b> High fives and fist bumps after class</span></div></div>
+          </div>
+          <div class="hour__rail" id="hourRail" aria-label="Class timeline">
+            <button type="button" data-i="0" class="is-on"><span class="hour__rail-m">:00</span><span class="hour__rail-l">The whiteboard</span></button>
+            <button type="button" data-i="1"><span class="hour__rail-m">:10</span><span class="hour__rail-l">The warm-up</span></button>
+            <button type="button" data-i="2"><span class="hour__rail-m">:25</span><span class="hour__rail-l">Strength</span></button>
+            <button type="button" data-i="3"><span class="hour__rail-m">:40</span><span class="hour__rail-l">The workout</span></button>
+            <button type="button" data-i="4"><span class="hour__rail-m">:55</span><span class="hour__rail-l">High fives</span></button>
           </div>
         </div>
       </div>
@@ -366,24 +308,27 @@
 
     <!-- ================= NEW HERE: THREE DOORS ================= -->
     <section class="doors light" id="new-here">
-      <div class="wrap">
-        <span class="eyebrow">New here?</span>
-        <h2 style="margin-top:1.1rem;">Pick your door.</h2>
-        <div class="doors__grid">
-          <div class="door">
+      <div class="wrap doors__grid">
+        <div class="doors__head">
+          <span class="eyebrow">New here?</span>
+          <h2 style="margin-top:1.1rem;">Pick your door.</h2>
+          <p class="sub" style="margin-top:1.3rem;">Three ways in. None of them involve committing to anything before you have seen the place.</p>
+        </div>
+        <div class="doors__stack">
+          <div class="door" style="--i:0">
             <span class="door__tag">Door one</span>
             <h3>Try a class free</h3>
             <p>One regular class, on us. A coach will meet you 15 minutes early, show you around, and stay next to you the whole hour.</p>
             <!-- PushPress: free trial registration URL goes in INTEGRATIONS.pushpress.trial (js/main.js) -->
             <button class="btn btn--solid pp-btn" data-pp="trial">Book my free class</button>
           </div>
-          <div class="door">
+          <div class="door" style="--i:1">
             <span class="door__tag">Door two</span>
             <h3>Drop in for a visit</h3>
             <p>On 30A for the week? Grab a drop-in, get the best workout of your vacation, and go back to the beach.</p>
             <a class="btn btn--line" href="drop-in.html">Drop-in details</a>
           </div>
-          <div class="door">
+          <div class="door" style="--i:2">
             <span class="door__tag">Door three</span>
             <h3>Just come watch</h3>
             <p>Seriously. Swing by, watch a class, meet a coach, and leave without doing a single burpee. Zero pressure.</p>

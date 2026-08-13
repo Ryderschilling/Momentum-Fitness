@@ -33,9 +33,20 @@ Every photo slot on the site is labeled with a chip ("Photo 01" etc). Replace th
 
 **Logo: done.** The real logo is in place, `img/logo.webp` (dark wordmark, for light backgrounds) and `img/logo-light.webp` (bone wordmark, for the dark footer). Both were derived from `Momentum-Fitness-Logo-Color.webp`. `img/wave.svg` is now only used as the favicon.
 
-## ⚠️ ScrollTrigger gotcha, do not undo
+## Motion system (rebuilt 2026-08-13)
 
-The hour section pins, which adds 2600px of spacer. Any trigger created before it in `main.js` measures 2600px too high, and `ScrollTrigger.refresh()` will not fix it because the refresh order is the problem. `#hourStage` carries `refreshPriority: 10` so it is always measured first. There is also a `ScrollTrigger.refresh()` on window load, on fonts ready, and on debounced resize, because positions are otherwise measured before webfonts settle.
+Modelled on jobyaviation.com. That site has **no scroll animation at all**: no GSAP scrubbing, no canvas, no video. Every effect is `position: sticky` on elements of different heights, so some layers hold while others move, and the difference in speed reads as depth. Same approach here.
+
+1. **The hero holds.** `.hero` is `position: sticky; top: 0; height: 100svh`. Every following section is `position: relative; z-index: 1` and rides over the top of it. ⚠️ **Every section after the hero must have an opaque background or the hero shows through.** `.sched` had none and needed one adding.
+2. **The Best Hour.** The **photo card holds** (`position: sticky`) and the minute number plus its copy walk past it on the left. An IntersectionObserver with `rootMargin: -42% 0px -42%` decides which block of copy owns the middle of the screen, and that crossfades the photo and moves the marker on the timeline strip under the card. On a phone the card sticks to the top instead and the copy scrolls under it, and the timeline drops its labels to numbers only because five labels never fit across 390px. **The GSAP pin is gone**, and with it the 2600px spacer and the refreshPriority fragility. The separate mobile markup is also gone: one markup serves every screen, so the copy is no longer duplicated in the DOM.
+3. **Pick your door.** The headline holds while the three cards stack under it, each sticking `3.2rem` lower than the last.
+4. **Headlines resolve per character.** JS splits every `h1`/`h2` into letter spans with a 17ms stagger, capped at 620ms. ⚠️ `<em>` is deliberately **not** split: `background-clip: text` breaks the moment its letters get their own transforms, so the em animates as one unit. Original text goes to `aria-label` and the spans are `aria-hidden`.
+
+⚠️ **Sticky elements are excluded from the generic reveal system.** A sticky card fading from `opacity: 0` lets you see straight through it to the card underneath, which looked like a rendering bug. `tag()` now skips anything computing to `position: sticky`.
+
+⚠️ **Do not put `overflow: hidden` on `body` or any ancestor.** It kills every sticky on the page. The build uses `overflow-x: clip`.
+
+Reduced motion is fully handled: no character splitting, all frames visible, everything static.
 
 ## Every missing number and link
 
