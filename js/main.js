@@ -54,6 +54,60 @@ const INTEGRATIONS = {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /* ------------------------------ Page transitions
+     Same-site links wipe out under the curtain, then the next page wipes it
+     off the top. Anything external, modified, or download-y is left alone. */
+  if (!reduceMotion) {
+    const OUT = 460; // must match the CSS transition
+    let leaving = false;
+
+    // A finished animation with fill:both outranks a later transition on the
+    // same property, so the entrance class has to be cleared or the SECOND
+    // navigation never wipes out. Found this the hard way.
+    if (doc.classList.contains('is-entering')) {
+      const clearEntering = () => doc.classList.remove('is-entering');
+      doc.addEventListener('animationend', clearEntering, { once: true });
+      setTimeout(clearEntering, 1000);
+    }
+
+    const internal = (a) => {
+      if (!a || leaving) return false;
+      if (a.target && a.target !== '_self') return false;
+      if (a.hasAttribute('download')) return false;
+      const href = a.getAttribute('href') || '';
+      if (!href || href.startsWith('#')) return false;
+      if (/^(tel:|sms:|mailto:|javascript:)/i.test(href)) return false;
+      let url;
+      try { url = new URL(a.href, location.href); } catch (e) { return false; }
+      if (url.origin !== location.origin) return false;
+      // a link to the page we are already on is a no-op, not a transition
+      if (url.pathname === location.pathname && url.hash) return false;
+      return url;
+    };
+
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      const url = internal(a);
+      if (!url) return;
+      e.preventDefault();
+      leaving = true;
+      try { sessionStorage.setItem('mf-nav', '1'); } catch (err) {}
+      doc.classList.add('is-leaving');
+      setTimeout(() => { location.href = url.href; }, OUT);
+    });
+
+    // coming back through the bfcache must not leave the curtain down
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) {
+        leaving = false;
+        doc.classList.remove('is-leaving', 'is-entering');
+        try { sessionStorage.removeItem('mf-nav'); } catch (err) {}
+      }
+    });
+  }
+
   /* ------------------------------ Mobile drawer */
   const burger = document.getElementById('burger');
   const drawer = document.getElementById('drawer');
@@ -61,12 +115,14 @@ const INTEGRATIONS = {
     burger.addEventListener('click', () => {
       const open = drawer.classList.toggle('is-open');
       burger.classList.toggle('is-open', open);
+      doc.classList.toggle('drawer-open', open);
       burger.setAttribute('aria-expanded', String(open));
       document.body.style.overflow = open ? 'hidden' : '';
     });
     drawer.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
       drawer.classList.remove('is-open');
       burger.classList.remove('is-open');
+      doc.classList.remove('drawer-open');
       document.body.style.overflow = '';
     }));
   }

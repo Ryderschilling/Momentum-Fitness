@@ -42,6 +42,10 @@ Modelled on jobyaviation.com. That site has **no scroll animation at all**: no G
 3. **Pick your door.** The headline holds while the three cards stack under it, each sticking `3.2rem` lower than the last.
 4. **Headlines resolve per character.** JS splits every `h1`/`h2` into letter spans with a 17ms stagger, capped at 620ms. ⚠️ `<em>` is deliberately **not** split: `background-clip: text` breaks the moment its letters get their own transforms, so the em animates as one unit. Original text goes to `aria-label` and the spans are `aria-hidden`.
 
+5. **Page transitions.** Clicking any same-site link wipes a brand-gradient curtain up over the page, then the next page wipes it off the top, so there is never a white flash between pages. The curtain is `html::after`, the exit is a class + transition, the entrance is a **self-completing CSS animation** set by a tiny inline script in `<head>` before first paint (flagged through `sessionStorage`). With JS off, no flag is ever set and navigation is completely normal. External links, `tel:`, `sms:`, `mailto:`, downloads, new tabs and modified clicks are all left alone, and `pageshow` clears the curtain on a bfcache back.
+
+⚠️ **A finished animation with `fill: both` outranks a later transition on the same property.** The entrance class has to be removed on `animationend` or the SECOND navigation never wipes out, it just sits parked off the top. There is a 1s timeout as a backstop.
+
 ⚠️ **Sticky elements are excluded from the generic reveal system.** A sticky card fading from `opacity: 0` lets you see straight through it to the card underneath, which looked like a rendering bug. `tag()` now skips anything computing to `position: sticky`.
 
 ⚠️ **Do not put `overflow: hidden` on `body` or any ancestor.** It kills every sticky on the page. The build uses `overflow-x: clip`.

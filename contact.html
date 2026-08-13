@@ -10,7 +10,7 @@
   <link rel="icon" href="img/icon-192.png" type="image/png" sizes="192x192">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
-  <meta name="theme-color" content="#15161B">
+  <meta name="theme-color" content="#FFFFFF">
   <link rel="preload" href="fonts/bigshoulders.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/publicsans.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="canonical" href="https://30acrossfit.com/contact">
@@ -21,14 +21,25 @@
   <meta property="og:image" content="https://30acrossfit.com/img/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  <script>
+    // runs before first paint so the curtain is already in place on arrival
+    document.documentElement.classList.replace('no-js', 'js');
+    try {
+      if (sessionStorage.getItem('mf-nav') === '1' &&
+          !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('is-entering');
+      }
+      sessionStorage.removeItem('mf-nav');
+    } catch (e) {}
+  </script>
 </head>
 <body>
 
   <header class="nav" id="nav">
     <div class="wrap wrap--wide nav__inner">
       <a href="index.html" class="nav__logo" aria-label="Momentum Fitness home">
-        <img src="img/logo.webp" alt="Momentum Fitness, 30A CrossFit" width="580" height="326">
+        <img class="logo--dark" src="img/logo.webp" alt="Momentum Fitness, 30A CrossFit" width="580" height="326">
+        <img class="logo--light" src="img/logo-light.webp" alt="" width="580" height="326" aria-hidden="true">
       </a>
       <nav class="nav__links" aria-label="Primary">
         <a href="index.html">Home</a>
@@ -45,14 +56,22 @@
   </header>
 
   <div class="nav-drawer" id="drawer">
-    <a href="index.html">Home</a>
-    <a href="memberships.html">Memberships</a>
-    <a href="drop-in.html">Drop-In</a>
-    <a href="about.html">About</a>
-    <a href="contact.html" aria-current="page">Contact</a>
-    <div class="nav-drawer__foot btn-row">
-      <a class="btn btn--solid" href="sms:+18505023454">Text Us</a>
-      <a class="btn btn--line" href="tel:+18505023454">Call 850-502-3454</a>
+    <div class="nav-drawer__inner">
+      <nav class="nav-drawer__links" aria-label="Mobile">
+        <a href="index.html"><span class="nav-drawer__n">01</span>Home</a>
+        <a href="memberships.html"><span class="nav-drawer__n">02</span>Memberships</a>
+        <a href="drop-in.html"><span class="nav-drawer__n">03</span>Drop-In</a>
+        <a href="about.html"><span class="nav-drawer__n">04</span>About</a>
+        <a href="contact.html" aria-current="page"><span class="nav-drawer__n">05</span>Contact</a>
+      </nav>
+      <div class="nav-drawer__foot">
+        <span class="nav-drawer__label">A human answers</span>
+        <div class="btn-row">
+          <a class="btn btn--solid" href="sms:+18505023454">Text Us</a>
+          <a class="btn btn--line" href="tel:+18505023454">Call 850-502-3454</a>
+        </div>
+        <p class="nav-drawer__addr">170 Serenoa Rd, Santa Rosa Beach &middot; Mon to Sat</p>
+      </div>
     </div>
   </div>
 
