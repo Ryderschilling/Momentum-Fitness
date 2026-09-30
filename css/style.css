@@ -283,6 +283,7 @@ section { position: relative; }
 .hour__frame.was-on { clip-path: inset(0 0 0 0); z-index: 1; }
 .hour__frame img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transition: transform 1.6s var(--ease); }
 .hour__frame.is-on img { transform: scale(1); }
+.hour__step-ph { display: none; }
 .hour__clock { position: absolute; left: 1rem; bottom: 1rem; z-index: 3; background: rgba(20,21,25,.78); color: #fff; backdrop-filter: blur(8px); padding: .55rem .8rem; border-radius: 4px; font: 700 .74rem/1 var(--body); letter-spacing: .16em; text-transform: uppercase; }
 .hour__rail { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; }
 .hour__rail button { text-align: left; padding: .75rem 0 .2rem; border-top: 3px solid var(--sand-2); position: relative; min-height: 44px; }
@@ -652,4 +653,58 @@ section { position: relative; }
   .hrail__track { transform: none !important; width: auto; overflow-x: auto; }
   .hour__frame { transition: none; }
   .banner img { transform: none !important; }
+}
+
+/* ============================================================
+   PHONES: the hero lives in normal flow. On iOS the visible height
+   swings with the toolbars, so absolutely anchoring tall type to the
+   bottom of a 100svh box pushed it up under the nav. Here the content
+   sets the height and the photo simply fills behind it.
+   ============================================================ */
+@media (max-width: 700px) {
+  .hero { height: auto; }
+  .hero__stick { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; }
+  .hero__frame { clip-path: none; }
+  .hero__frame img { transform: none; object-position: 55% 30%; }
+  .hero__frame::after {
+    background:
+      linear-gradient(180deg, rgba(20,21,25,.7) 0%, rgba(20,21,25,.25) 22%, rgba(20,21,25,.35) 45%, rgba(20,21,25,.94) 78%),
+      rgba(20,21,25,.12);
+  }
+  .hero__content { position: relative; inset: auto; opacity: 1; transform: none; padding-top: calc(var(--nav-h) + 14svh); padding-bottom: 1.6rem; }
+  .hero__tagline { display: none; }
+  .hero h1 { font-size: clamp(2.7rem, 12.4vw, 3.9rem); line-height: .88; max-width: none; }
+  .hero .eyebrow { font-size: .68rem; letter-spacing: .16em; }
+  .hero__row { margin-top: 1.1rem; gap: 1.2rem; }
+  .hero__sub { font-size: 1rem; line-height: 1.5; }
+  .hero .btn-row { width: 100%; }
+  .hero .btn-row .btn { flex: 1 1 100%; }
+  .hero__meta { gap: .5rem 1.2rem; margin-top: 1.3rem; padding-top: .9rem; font-size: .64rem; letter-spacing: .12em; }
+  .btn { min-height: 50px; padding: .9rem 1.2rem; font-size: .76rem; letter-spacing: .12em; }
+  .nav__cta { min-height: 42px; }
+  .pad { padding-block: 4.5rem; }
+  h2 { font-size: clamp(2.4rem, 11vw, 3.4rem); }
+  .phero { padding-top: calc(var(--nav-h) + 2.2rem); }
+  .phero h1 { font-size: clamp(2.8rem, 13vw, 4rem); }
+  .lead { font-size: 1.05rem; }
+  .marquee__item { font-size: 1.6rem; gap: 1.2rem; padding-right: 1.2rem; }
+  .marquee__item img { width: 28px; }
+  .marquee__pause { width: 44px; height: 44px; right: .4rem; }
+}
+
+/* Phones: the Best Hour becomes a simple stack, one photo per minute.
+   A sticky card eating half of a small screen left the copy squeezed
+   underneath it, so on phones every step carries its own photo. */
+@media (max-width: 700px) {
+  .hour__card { display: none; }
+  .hour__steps { padding-block: 1.5rem 0; display: grid; gap: 2.4rem; }
+  .hour__step { min-height: 0; gap: .6rem; }
+  .hour__step-ph { display: block; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; margin-bottom: .6rem; }
+  .hour__step-ph img { width: 100%; height: 100%; object-fit: cover; }
+  .hour__step .hour__min { opacity: 1; font-size: 3.6rem; }
+  .hour__step h3 { color: var(--txt); }
+  .hour__step p { color: var(--txt-2); }
+  .footer__top { grid-template-columns: 1fr 1fr; gap: 2rem 1.2rem; }
+  .footer__brand, .footer__col:last-child { grid-column: 1 / -1; }
+  .footer__word { -webkit-text-stroke-width: 1px; }
 }

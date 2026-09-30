@@ -207,7 +207,8 @@ const PLANS = {
     const vh = innerHeight;
     if (hero && !reduce) {
       const r = hero.getBoundingClientRect();
-      const p = clamp(-r.top / (r.height - vh));
+      const span = r.height - vh;
+      const p = span > 40 ? clamp(-r.top / span) : 0;
       hero.style.setProperty('--p', p.toFixed(4));
     }
     if (crew && crewCols.length && !reduce) {
