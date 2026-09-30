@@ -718,3 +718,19 @@ section { position: relative; }
 .textcta .eyebrow::after, .mission .eyebrow::after, .crew__head .eyebrow::after { content: ''; width: 26px; height: 3px; background: var(--sunset); border-radius: 2px; }
 .textcta .wrap > * { text-align: center; margin-inline: auto; }
 .textcta .btn-row { justify-content: center; }
+
+/* plan groups on the memberships page */
+.plans__label { font: 700 .8rem/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--txt-2); margin: 0 0 1.1rem; display: flex; align-items: center; gap: 1rem; }
+.plans__label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.plans + .plans__label { margin-top: 3rem; }
+.plan--free { background: var(--sunset); color: #fff; overflow: hidden; isolation: isolate; --txt-2: #FFFFFF; --txt-3: #F4F1EA; --border: rgba(255,255,255,.35); }
+.plan--free::after { content: ''; position: absolute; inset: 0; background: rgba(20,21,25,.42); z-index: -1; border-radius: 12px; }
+.plan--free .plan__flag { background: #fff; color: var(--night); }
+.plan--free li::before { border-color: #fff; }
+.plan--free .btn--solid { background: #fff; color: var(--night); --b: #fff; }
+.plan--free .btn--solid::before { background: var(--night); }
+.plan--free .btn--solid:hover { color: #fff; border-color: var(--night); }
+@media (min-width: 1100px) { .plans { grid-template-columns: repeat(4, 1fr); } }
+.plan { display: flex; flex-direction: column; }
+.plan .btn { margin-top: auto; }
+.plan ul { margin-bottom: .6rem; }
