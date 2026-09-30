@@ -6,3 +6,6 @@ node_modules/
 .env
 .env.local
 *.log
+
+# client paperwork, never deploy
+_client/

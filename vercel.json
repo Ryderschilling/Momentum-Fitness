@@ -1,0 +1,29 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/index", "destination": "/", "permanent": true },
+    { "source": "/home-1", "destination": "/", "permanent": true },
+    { "source": "/dropin", "destination": "/drop-in", "permanent": true },
+    { "source": "/try-us-out", "destination": "/memberships#trial", "permanent": true },
+    { "source": "/our-classes", "destination": "/memberships#classes", "permanent": true },
+    { "source": "/schedule-1", "destination": "/#hours", "permanent": true },
+    { "source": "/ourteam", "destination": "/about#coaches", "permanent": true },
+    { "source": "/ourfacility", "destination": "/about#facility", "permanent": true },
+    { "source": "/private-coaching", "destination": "/about#offer", "permanent": true },
+    { "source": "/momentumfitness", "destination": "/about", "permanent": true },
+    { "source": "/jordan", "destination": "/about", "permanent": true },
+    { "source": "/john", "destination": "/about", "permanent": true },
+    { "source": "/bill", "destination": "/about#coaches", "permanent": true }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+      { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
+      { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+    ]},
+    { "source": "/(img|fonts)/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" } ] },
+    { "source": "/(css|js)/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" } ] }
+  ]
+}

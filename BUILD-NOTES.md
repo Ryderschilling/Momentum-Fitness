@@ -1,67 +1,53 @@
-# Momentum Fitness | 30A CrossFit — Build Notes
+# Momentum Fitness | 30A CrossFit: Build Notes
 
-**Hero + Google data 2026-08-13 (round 2):** the home hero is now the real crew photo pulled from their live Squarespace site (`img/hero.webp`). ⚠️ That file is only 1440x1083, the largest Squarespace will serve. Get the untouched original off Jordan's phone before launch. The reviews section now carries three REAL Google reviews from the live Business Profile, plus the real 4.7 / 44 headline linked to the profile. `index.html` also has canonical, OG tags and LocalBusiness JSON-LD with the real rating, address, phone and hours. The other four pages still need that block.
+**v3 revamp, 2026-09-30.** Real photography, real pricing, in-site PushPress checkout, Resend contact form, GTM-ready tracking, full SEO kit. Static HTML/CSS/JS on Vercel with one serverless function. No build step.
 
-**Restyle 2026-08-13:** white/paper theme with the logo's sunset colors as accents. Type is now **Big Shoulders Display** (headlines, uppercase) + **Public Sans** (body), self-hosted in `fonts/`. The old `bricolage.woff2` and `archivo*.woff2` files are unused and can be deleted. Home hero and the feature splits are now real two-column splits instead of full-bleed photos with a dark scrim.
+## Launch checklist (in order)
 
-Mockup build, 2026-08-10. Static HTML/CSS/JS, self-hosted fonts (Bricolage Grotesque + Archivo), GSAP + ScrollTrigger, Lenis on desktop only. All integrations are honest previews until wired (see below). `tel:` and `sms:` links are live.
+1. **Vercel env var:** `RESEND_API_KEY` (required). Optional: `CONTACT_TO` (defaults to `info@momentum.fit`), `CONTACT_FROM` (defaults to `Momentum Fitness Website <leads@ryderschilling.com>`, must be a Resend-verified domain).
+2. **Test the form on the preview URL.** Submit once, confirm it lands in info@momentum.fit.
+3. **GTM:** create the container, paste the ID into `js/tag.js` (`window.MF_GTM_ID = 'GTM-XXXX'`). In GTM add the GA4 config tag plus event tags for `checkout_open`, `trial_click`, `generate_lead`, `phone_click`, `email_click` (every button already pushes these).
+4. **Test checkout on an iPhone.** Open a plan in the drawer and get to the email step. If Safari ever misbehaves inside the drawer, the "Open in a new tab" link is always visible.
+5. **DNS at GoDaddy** (John's account): point `30acrossfit.com` and `momentum.fit` to Vercel. Canonical domain is **30acrossfit.com** (keeps the old site's Google history and matches the GBP link). Make momentum.fit redirect to it.
+6. Search Console: add the domain property, submit `/sitemap.xml`. Old Squarespace URLs are 301'd in `vercel.json`.
+7. Switch `CONTACT_FROM` to an @momentum.fit address once momentum.fit is verified in Resend.
+8. Cancel Squarespace only after the new site is live on the domain.
 
-## Photo shot list for Jordan (17 shots)
+## Where things live
 
-Every photo slot on the site is labeled with a chip ("Photo 01" etc). Replace the matching `.ph` block with a real `<img>`.
+| Thing | File |
+|---|---|
+| Every PushPress link + price shown in the checkout drawer | `js/main.js` → `PLANS` |
+| Prices shown on the cards | `memberships.html`, `drop-in.html`, `index.html` (doors) |
+| GTM container ID + event list | `js/tag.js` |
+| Contact form email (Resend) | `api/contact.js` |
+| Redirects, clean URLs, cache headers | `vercel.json` |
+| SEO | `sitemap.xml`, `robots.txt`, `llms.txt`, JSON-LD graph in every page head |
+| Photos (webp, 700/1200/2000 widths) | `img/p/` |
 
-| # | Shot | Where it goes |
-|---|------|---------------|
-| 01 | ~~Wide shot of the gym floor mid-class~~ **FILLED** with the crew photo from their old site. Still want the full-res original from Jordan. | Home hero |
-| 02 | Coach at the whiteboard, class gathered around | Home, "Best Hour" :00 |
-| 03 | Warm-up: rowers, bikes, people laughing | Home, "Best Hour" :10 |
-| 04 | Barbell work, coach correcting someone's form | Home, "Best Hour" :25 |
-| 05 | The WOD at peak effort, big energy | Home, "Best Hour" :40 |
-| 06 | High fives / fist bumps right after class | Home, "Best Hour" :55 |
-| 07 | Jordan, candid coaching shot (portrait) | Coaches strip |
-| 08 | John, candid coaching shot (portrait) | Coaches strip |
-| 09 | Michael S (portrait) | Coaches strip |
-| 10 | Robby (portrait) | Coaches strip |
-| 11 | Emily (portrait) | Coaches strip |
-| 12 | Dan (portrait) | Coaches strip |
-| 13 | CJ (portrait) | Coaches strip |
-| 14 | Michael K (portrait) | Coaches strip |
-| 15 | A first-timer mid-class with a coach beside them | Memberships, free trial banner (landscape) |
-| 16 | Drop-in visitors post-class, sweaty and smiling | Drop-In page banner (landscape) |
-| 17 | The empty facility, wide: rig, barbells, rowers, open floor | About, facility banner (landscape) |
+A `data-plan="<key>"` attribute on any link opens that plan in the checkout drawer. With JS off it's a plain link to PushPress.
 
+## Photos
 
-**Logo: done.** The real logo is in place, `img/logo.webp` (dark wordmark, for light backgrounds) and `img/logo-light.webp` (bone wordmark, for the dark footer). Both were derived from `Momentum-Fitness-Logo-Color.webp`. `img/wave.svg` is now only used as the favicon.
+All from the gym's own Squarespace site (their content). Swap any file in `img/p/` with the same name to replace it.
 
-## Motion system (rebuilt 2026-08-13)
+**Still needed from Jordan:** coach photos for **Ben, Brooklyne, Lyla** (cards show a gradient "photo coming soon" tile) and one line per coach. **Confirm `coach-michael.webp` is the right Michael** (old site labeled it "Michael S"). John's photo is small (457px), a better one would help.
 
-Modelled on jobyaviation.com. That site has **no scroll animation at all**: no GSAP scrubbing, no canvas, no video. Every effect is `position: sticky` on elements of different heights, so some layers hold while others move, and the difference in speed reads as depth. Same approach here.
+## Copy
 
-1. **The hero holds.** `.hero` is `position: sticky; top: 0; height: 100svh`. Every following section is `position: relative; z-index: 1` and rides over the top of it. ⚠️ **Every section after the hero must have an opaque background or the hero shows through.** `.sched` had none and needed one adding.
-2. **The Best Hour.** The **photo card holds** (`position: sticky`) and the minute number plus its copy walk past it on the left. An IntersectionObserver with `rootMargin: -42% 0px -42%` decides which block of copy owns the middle of the screen, and that crossfades the photo and moves the marker on the timeline strip under the card. On a phone the card sticks to the top instead and the copy scrolls under it, and the timeline drops its labels to numbers only because five labels never fit across 390px. **The GSAP pin is gone**, and with it the 2600px spacer and the refreshPriority fragility. The separate mobile markup is also gone: one markup serves every screen, so the copy is no longer duplicated in the DOM.
-3. **Pick your door.** The headline holds while the three cards stack under it, each sticking `3.2rem` lower than the last.
-4. **Headlines resolve per character.** JS splits every `h1`/`h2` into letter spans with a 17ms stagger, capped at 620ms. ⚠️ `<em>` is deliberately **not** split: `background-clip: text` breaks the moment its letters get their own transforms, so the em animates as one unit. Original text goes to `aria-label` and the spans are `aria-hidden`.
+Class descriptions, drop-in rules, Jordan's and John's quotes, and the mission line are the gym's own words from their current site. Reviews are real Google reviews, never invent them.
 
-5. **Page transitions.** Clicking any same-site link wipes a brand-gradient curtain up over the page, then the next page wipes it off the top, so there is never a white flash between pages. The curtain is `html::after`, the exit is a class + transition, the entrance is a **self-completing CSS animation** set by a tiny inline script in `<head>` before first paint (flagged through `sessionStorage`). With JS off, no flag is ever set and navigation is completely normal. External links, `tel:`, `sms:`, `mailto:`, downloads, new tabs and modified clicks are all left alone, and `pageshow` clears the curtain on a bfcache back.
+## Motion (all native, no GSAP)
 
-⚠️ **A finished animation with `fill: both` outranks a later transition on the same property.** The entrance class has to be removed on `animationend` or the SECOND navigation never wipes out, it just sits parked off the top. There is a 1s timeout as a backstop.
+- Home hero: sticky photo that shrinks into a rounded frame as you scroll (`--p` progress var).
+- Best Hour: copy scrolls past a sticky photo card, frames wipe in, timeline fills.
+- Crew wall: three photo columns at different scroll speeds.
+- Doors: stacking sticky cards. About: horizontal facility rail driven by vertical scroll.
+- Page transitions: brand-gradient curtain. Lenis smooth scroll on desktop pointer only.
+- `prefers-reduced-motion`: everything static and visible.
 
-⚠️ **Sticky elements are excluded from the generic reveal system.** A sticky card fading from `opacity: 0` lets you see straight through it to the card underneath, which looked like a rendering bug. `tag()` now skips anything computing to `position: sticky`.
+⚠️ Never put `overflow: hidden` on body or a section ancestor of a sticky element. The build uses `overflow-x: clip`.
 
-⚠️ **Do not put `overflow: hidden` on `body` or any ancestor.** It kills every sticky on the page. The build uses `overflow-x: clip`.
+## Verified 2026-09-30
 
-Reduced motion is fully handled: no character splitting, all frames visible, everything static.
-
-## Every missing number and link
-
-1. **Membership prices (3)** — `memberships.html`, each card has a `PRICE TBD` comment. Do not guess.
-2. **Drop-in price** — `drop-in.html`, hero, `PRICE TBD` comment.
-3. **PushPress URLs (5)** — `js/main.js`, the `INTEGRATIONS.pushpress` object: trial, dropin, membership-unlimited, membership-3x, punchcard. Paste each checkout/registration URL, one line each.
-4. **Contact form endpoint** — `js/main.js`, `INTEGRATIONS.form` (Formspree or similar). Until set, submits show an honest preview notice.
-5. **Class schedule link** — home page "See the class schedule" button currently routes through the trial preview. Point it at the live PushPress schedule when connected (`CLASS TIMES TBD` comment in `index.html`).
-6. ~~3 real Google reviews~~ **DONE.** Three real ones are live on the home page, pulled from the Google Business Profile 2026-08-13. Never swap them for invented copy.
-7. **Confirm with Jordan**: exact drop-in booking lead time (site says "book the night before"), punch card class count (site assumes 10), and whether the free trial is truly any class.
-
-## How the integration previews work
-
-Every PushPress button and the contact form are fully styled, real UI. While their `INTEGRATIONS` value is `null`, clicking shows an inline notice: "Booking isn't connected yet. This is a design preview." No `alert()`, no fake success. Paste the real URL and the same button opens live checkout: one line per service.
+axe-core (WCAG 2.2 AA + best practice): 0 violations on all 6 pages at 1440 and 390. No horizontal scroll at 390. Checkout drawer: opens live PushPress, Escape closes, focus returns to the button. Form: validation, error fallback, success path, dataLayer event. API: 405/400/honeypot/success/Resend-failure paths.

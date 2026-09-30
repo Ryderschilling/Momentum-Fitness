@@ -4,443 +4,459 @@
    ============================================================ */
 
 /* ------------------------------------------------------------
-   INTEGRATIONS: every third-party hookup lives here.
-   Flip each one on by pasting the real URL. One line per service.
-   While a value is null, the UI shows an honest "preview" notice
-   instead of faking a booking or a sent message.
+   PLANS: every PushPress link on the site lives here.
+   A button with data-plan="<key>" opens that checkout in the side drawer.
+   Change a price or a link here and every page follows.
    ------------------------------------------------------------ */
-const INTEGRATIONS = {
-  pushpress: {
-    // Free trial registration URL from PushPress (Landing > Plans > share link):
-    trial: null,
-    // Drop-in purchase URL from PushPress:
-    dropin: null,
-    // Unlimited membership checkout URL from PushPress:
-    'membership-unlimited': null,
-    // 3x/week membership checkout URL from PushPress:
-    'membership-3x': null,
-    // Punch card checkout URL from PushPress:
-    punchcard: null,
+const PLANS = {
+  trial: {
+    name: 'Free trial class', price: 'Free', kicker: 'Try us out',
+    note: 'Tell us a little about you. A coach will reach out to set up your first class, so we know you are coming.',
+    url: 'https://momentumfitness.pushpress.com/open/interested',
   },
-  // Contact form endpoint (e.g. Formspree: 'https://formspree.io/f/xxxx').
-  // POSTs { name, contact, message } as form data.
-  form: null,
+  dropin: {
+    name: 'Single drop-in', price: '$25', kicker: 'Drop-in',
+    note: 'One class. Checkout is handled by PushPress, our booking system.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_4416f437d7fc4e',
+  },
+  'dropin-week': {
+    name: 'Unlimited week pass', price: '$85', kicker: 'Drop-in',
+    note: 'Every class for 7 days. Checkout is handled by PushPress, our booking system.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_b5c8d1a3876345',
+  },
+  'dropin-month': {
+    name: '1-month unlimited drop-in', price: '$189', kicker: 'Drop-in',
+    note: 'Every class for a month. Does not auto-renew.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_f14a1055d6a743',
+  },
+  'membership-unlimited': {
+    name: 'Unlimited membership', price: '$189/mo', kicker: 'Membership',
+    note: 'Every class, every week. Checkout is handled by PushPress, our booking system.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_174cdbafcf914f',
+  },
+  'sessions-pack': {
+    name: 'Sessions pack', price: '$530', kicker: 'Membership',
+    note: '30 sessions to use within 4 months.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_c91c1ec21da043',
+  },
+  'family-member': {
+    name: 'Family member add-on', price: '$150/mo', kicker: 'Membership',
+    note: 'Unlimited for each additional family member: spouses, kids, and so on.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_dffea5af4a594d',
+  },
+  'military-first-responders': {
+    name: 'Military & first responders', price: '$160/mo', kicker: 'Membership',
+    note: 'Unlimited membership. Thank you for your service.',
+    url: 'https://momentumfitness.pushpress.com/landing/plans/plan_245502517a7647',
+  },
 };
 
 (() => {
   const doc = document.documentElement;
-  const hasGsap = typeof gsap !== 'undefined';
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isDesktop = () => window.matchMedia('(min-width: 900px)').matches;
-  const fineePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const track = (e, p) => window.mfTrack && window.mfTrack(e, p);
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-  if (!hasGsap || reduceMotion) doc.classList.add('motion-off');
-
-  /* ------------------------------ Lenis: desktop only */
+  /* ------------------------------ Smooth scroll: desktop pointer only */
   let lenis = null;
-  if (hasGsap && !reduceMotion && isDesktop() && fineePointer && typeof Lenis !== 'undefined') {
-    lenis = new Lenis({ duration: 1.15, smoothWheel: true });
-    gsap.registerPlugin(ScrollTrigger);
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((t) => lenis.raf(t * 1000));
-    gsap.ticker.lagSmoothing(0);
-  } else if (hasGsap) {
-    gsap.registerPlugin(ScrollTrigger);
+  if (!reduce && fine && typeof Lenis !== 'undefined' && innerWidth > 900) {
+    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
   }
 
-  /* ------------------------------ Nav state */
-  const nav = document.getElementById('nav');
-  const onScroll = () => nav && nav.classList.toggle('is-scrolled', window.scrollY > 60);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
-  /* ------------------------------ Page transitions
-     Same-site links wipe out under the curtain, then the next page wipes it
-     off the top. Anything external, modified, or download-y is left alone. */
-  if (!reduceMotion) {
-    const OUT = 460; // must match the CSS transition
-    let leaving = false;
-
-    // A finished animation with fill:both outranks a later transition on the
-    // same property, so the entrance class has to be cleared or the SECOND
-    // navigation never wipes out. Found this the hard way.
-    if (doc.classList.contains('is-entering')) {
-      const clearEntering = () => doc.classList.remove('is-entering');
-      doc.addEventListener('animationend', clearEntering, { once: true });
-      setTimeout(clearEntering, 1000);
-    }
-
-    const internal = (a) => {
-      if (!a || leaving) return false;
-      if (a.target && a.target !== '_self') return false;
-      if (a.hasAttribute('download')) return false;
-      const href = a.getAttribute('href') || '';
-      if (!href || href.startsWith('#')) return false;
-      if (/^(tel:|sms:|mailto:|javascript:)/i.test(href)) return false;
-      let url;
-      try { url = new URL(a.href, location.href); } catch (e) { return false; }
-      if (url.origin !== location.origin) return false;
-      // a link to the page we are already on is a no-op, not a transition
-      if (url.pathname === location.pathname && url.hash) return false;
-      return url;
-    };
-
-    document.addEventListener('click', (e) => {
-      if (e.defaultPrevented || e.button !== 0) return;
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const a = e.target.closest && e.target.closest('a[href]');
-      const url = internal(a);
-      if (!url) return;
-      e.preventDefault();
-      leaving = true;
-      try { sessionStorage.setItem('mf-nav', '1'); } catch (err) {}
-      doc.classList.add('is-leaving');
-      setTimeout(() => { location.href = url.href; }, OUT);
-    });
-
-    // coming back through the bfcache must not leave the curtain down
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) {
-        leaving = false;
-        doc.classList.remove('is-leaving', 'is-entering');
-        try { sessionStorage.removeItem('mf-nav'); } catch (err) {}
-      }
-    });
-  }
+  /* ------------------------------ Nav: dock, hide on the way down, show on the way up */
+  const nav = $('#nav');
+  let lastY = scrollY;
+  const navState = () => {
+    const y = scrollY;
+    if (!nav) return;
+    nav.classList.toggle('is-scrolled', y > 40);
+    const hide = y > 400 && y > lastY + 4 && !doc.classList.contains('drawer-open') && !nav.contains(document.activeElement);
+    if (hide) nav.classList.add('is-hidden');
+    else if (y < lastY - 4 || y < 400) nav.classList.remove('is-hidden');
+    lastY = y;
+  };
+  addEventListener('scroll', navState, { passive: true });
+  navState();
 
   /* ------------------------------ Mobile drawer */
-  const burger = document.getElementById('burger');
-  const drawer = document.getElementById('drawer');
+  const burger = $('#burger'), drawer = $('#drawer');
   if (burger && drawer) {
-    burger.addEventListener('click', () => {
-      const open = drawer.classList.toggle('is-open');
-      burger.classList.toggle('is-open', open);
-      doc.classList.toggle('drawer-open', open);
+    const setOpen = (open) => {
+      drawer.classList.toggle('is-open', open);
+      drawer.toggleAttribute('inert', !open);
       burger.setAttribute('aria-expanded', String(open));
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      doc.classList.toggle('drawer-open', open);
       document.body.style.overflow = open ? 'hidden' : '';
+      if (lenis) open ? lenis.stop() : lenis.start();
+      if (open) setTimeout(() => $('a', drawer)?.focus(), 250);
+    };
+    drawer.setAttribute('inert', '');
+    burger.addEventListener('click', () => setOpen(burger.getAttribute('aria-expanded') !== 'true'));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawer.classList.contains('is-open')) { setOpen(false); burger.focus(); } });
+    // keep Tab inside the open menu (burger + drawer links)
+    drawer.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const f = [burger, ...$$('a, button', drawer)];
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i === 1) { e.preventDefault(); burger.focus(); }
+      if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); burger.focus(); }
     });
-    drawer.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
-      drawer.classList.remove('is-open');
-      burger.classList.remove('is-open');
-      doc.classList.remove('drawer-open');
-      document.body.style.overflow = '';
+    burger.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && !e.shiftKey && drawer.classList.contains('is-open')) { e.preventDefault(); $('a', drawer).focus(); }
+    });
+  }
+
+  /* ------------------------------ Page transitions (brand curtain) */
+  if (!reduce) {
+    if (doc.classList.contains('is-entering')) {
+      const clear = () => doc.classList.remove('is-entering');
+      doc.addEventListener('animationend', clear, { once: true });
+      setTimeout(clear, 1000);
+    }
+    let leaving = false;
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || leaving) return;
+      const a = e.target.closest && e.target.closest('a[href]');
+      if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || /^(tel:|sms:|mailto:|javascript:)/i.test(href)) return;
+      let url; try { url = new URL(a.href, location.href); } catch (err) { return; }
+      if (url.origin !== location.origin) return;
+      if (url.pathname === location.pathname) return;
+      e.preventDefault(); leaving = true;
+      try { sessionStorage.setItem('mf-nav', '1'); } catch (err) {}
+      doc.classList.add('is-leaving');
+      setTimeout(() => { location.href = url.href; }, 460);
+    });
+    addEventListener('pageshow', (e) => { if (e.persisted) { leaving = false; doc.classList.remove('is-leaving', 'is-entering'); } });
+  }
+
+  /* ------------------------------ Tracking on contact links */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    const h = a.getAttribute('href') || '';
+    if (h.startsWith('tel:')) track('phone_click', { method: 'call' });
+    else if (h.startsWith('sms:')) track('phone_click', { method: 'text' });
+    else if (h.startsWith('mailto:')) track('email_click');
+  });
+
+  /* ------------------------------ Headline word reveal */
+  $$('[data-split]').forEach((el) => {
+    if (reduce) return;
+    el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+    let i = 0;
+    const walk = (node) => {
+      Array.from(node.childNodes).forEach((n) => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach((part) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+            const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+            const s = document.createElement('span'); s.textContent = part; s.style.setProperty('--i', i++);
+            w.appendChild(s); frag.appendChild(w);
+          });
+          node.replaceChild(frag, n);
+        } else if (n.nodeType === 1 && n.tagName === 'EM') {
+          // gradient text breaks if its letters get their own boxes, so the em moves as one word
+          const w = document.createElement('span'); w.className = 'w'; w.setAttribute('aria-hidden', 'true');
+          const s = document.createElement('span'); s.style.setProperty('--i', i++);
+          n.parentNode.replaceChild(w, n); s.appendChild(n); w.appendChild(s);
+        } else if (n.nodeType === 1 && n.tagName !== 'BR') walk(n);
+      });
+    };
+    walk(el);
+    el.classList.add('split');
+  });
+
+  /* ------------------------------ Reveal on enter */
+  const io = new IntersectionObserver((ents) => ents.forEach((en) => {
+    if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+  }), { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
+  $$('.split, .rv, .phero__media').forEach((el) => io.observe(el));
+  // the hero headline should not wait for a scroll
+  $$('.hero .split, .phero .split').forEach((el) => requestAnimationFrame(() => el.classList.add('in')));
+
+  /* ------------------------------ Scroll-linked effects (one rAF loop) */
+  const hero = $('.hero');
+  const crewCols = $$('.crew__col');
+  const crew = $('.crew');
+  const banners = $$('.banner');
+  const hrail = $('.hrail');
+  const hrailTrack = hrail && $('.hrail__track', hrail);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+  const sizeHrail = () => {
+    if (!hrail || reduce || innerWidth <= 900) { if (hrail) hrail.style.height = ''; return; }
+    const extra = hrailTrack.scrollWidth - innerWidth;
+    hrail.style.height = (innerHeight + Math.max(0, extra)) + 'px';
+  };
+  sizeHrail();
+  addEventListener('resize', sizeHrail);
+  addEventListener('load', sizeHrail);
+
+  let ticking = false;
+  const frame = () => {
+    ticking = false;
+    const vh = innerHeight;
+    if (hero && !reduce) {
+      const r = hero.getBoundingClientRect();
+      const p = clamp(-r.top / (r.height - vh));
+      hero.style.setProperty('--p', p.toFixed(4));
+    }
+    if (crew && crewCols.length && !reduce) {
+      const r = crew.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) {
+        const p = (vh - r.top) / (vh + r.height);
+        const speeds = [-260, 120, -380];
+        crewCols.forEach((c, i) => { c.style.transform = `translate3d(0, ${(p - .3) * speeds[i % 3]}px, 0)`; });
+      }
+    }
+    if (!reduce) banners.forEach((b) => {
+      const r = b.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) {
+        const p = (r.top + r.height / 2 - vh / 2) / vh;
+        b.style.setProperty('--py', (p * -60).toFixed(1));
+      }
+    });
+    if (hrail && hrailTrack && !reduce && innerWidth > 900) {
+      const r = hrail.getBoundingClientRect();
+      const dist = hrail.offsetHeight - vh;
+      const p = clamp(-r.top / Math.max(1, dist));
+      hrailTrack.style.transform = `translate3d(${-p * Math.max(0, hrailTrack.scrollWidth - innerWidth)}px, 0, 0)`;
+    }
+  };
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  frame();
+
+  /* ------------------------------ The Best Hour: copy walks past a card that holds */
+  const steps = $$('.hour__step');
+  if (steps.length) {
+    const frames = $$('.hour__frame');
+    const rail = $$('.hour__rail button');
+    const clock = $('.hour__clock');
+    let cur = -1;
+    const set = (i) => {
+      if (i === cur) return;
+      frames.forEach((f, k) => { f.classList.toggle('was-on', k === cur); f.classList.toggle('is-on', k === i); });
+      steps.forEach((s, k) => s.classList.toggle('is-on', k === i));
+      rail.forEach((b, k) => { b.classList.toggle('is-on', k === i); b.classList.toggle('is-past', k < i); b.setAttribute('aria-current', k === i ? 'step' : 'false'); });
+      if (clock) clock.textContent = steps[i].dataset.clock;
+      cur = i;
+    };
+    set(0);
+    const sio = new IntersectionObserver((ents) => ents.forEach((en) => {
+      if (en.isIntersecting) set(steps.indexOf(en.target));
+    }), { rootMargin: '-45% 0px -45% 0px' });
+    steps.forEach((s) => sio.observe(s));
+    rail.forEach((b, k) => b.addEventListener('click', () => {
+      const y = steps[k].getBoundingClientRect().top + scrollY - innerHeight * 0.3;
+      lenis ? lenis.scrollTo(y) : scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
     }));
   }
 
-  /* ------------------------------ Hero entrance */
-  if (hasGsap && !reduceMotion) {
-    const heroEls = document.querySelectorAll('[data-hero]');
-    if (heroEls.length) {
-      gsap.to(heroEls, {
-        opacity: 1, y: 0,
-        duration: 1.15, stagger: 0.13, delay: 0.25,
-        ease: 'power3.out',
-        overwrite: true,
-      });
-    }
-  }
-
-  /* ------------------------------ Keep ScrollTrigger honest
-     Positions are measured before webfonts and images settle, so every
-     trigger drifts. Re-measure once the page is genuinely done. */
-  if (hasGsap && typeof ScrollTrigger !== 'undefined') {
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener('load', refresh);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
-    let rt;
-    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(refresh, 220); });
-  }
-
-  /* ------------------------------ Parallax (desktop only) */
-  if (hasGsap && !reduceMotion && isDesktop()) {
-    gsap.utils.toArray('[data-parallax]').forEach((el) => {
-      gsap.fromTo(el, { yPercent: -4 }, {
-        yPercent: -8.5,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: el.closest('section') || el.parentElement,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
-    });
-  }
-
-  /* ------------------------------ The Best Hour: pinned scrub (desktop) */
-  const stage = document.getElementById('hourStage');
-  if (stage) {
-    const steps = [...document.querySelectorAll('#hourSteps .hour__step')];
-    const frames = [...document.querySelectorAll('#hourFrames .hour__frame')];
-    const railBtns = [...document.querySelectorAll('#hourRail button')];
-    let current = -1;
-
-    const setPhase = (i) => {
-      if (i === current || i < 0) return;
-      current = i;
-      steps.forEach((s2, k) => s2.classList.toggle('is-on', k === i));
-      frames.forEach((f, k) => f.classList.toggle('is-on', k === i));
-      railBtns.forEach((b2, k) => b2.classList.toggle('is-on', k === i));
+  /* ------------------------------ Horizontal rails with prev / next */
+  $$('[data-rail]').forEach((wrap) => {
+    const rail = $('.coaches__rail', wrap) || wrap.querySelector('[data-rail-track]');
+    const prev = $('[data-prev]', wrap), next = $('[data-next]', wrap);
+    if (!rail) return;
+    const step = () => (rail.firstElementChild?.getBoundingClientRect().width || 300) + 18;
+    const upd = () => {
+      if (prev) prev.disabled = rail.scrollLeft < 8;
+      if (next) next.disabled = rail.scrollLeft + rail.clientWidth > rail.scrollWidth - 8;
     };
-    setPhase(0);
-
-    if ('IntersectionObserver' in window && !reduceMotion) {
-      // whichever block of copy owns the middle band picks the photo
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((e) => { if (e.isIntersecting) setPhase(steps.indexOf(e.target)); });
-      }, { rootMargin: '-42% 0px -42% 0px', threshold: 0 });
-      steps.forEach((s2) => io.observe(s2));
-    } else {
-      steps.forEach((s2) => s2.classList.add('is-on'));
-      frames.forEach((f) => f.classList.add('is-on'));
+    prev && prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }));
+    next && next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: reduce ? 'auto' : 'smooth' }));
+    rail.addEventListener('scroll', upd, { passive: true });
+    addEventListener('resize', upd); upd();
+    // drag to scroll with a mouse
+    if (fine) {
+      let down = false, sx = 0, sl = 0, moved = false;
+      rail.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; down = true; moved = false; sx = e.clientX; sl = rail.scrollLeft; rail.style.scrollSnapType = 'none'; });
+      addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - sx; if (Math.abs(dx) > 4) moved = true; rail.scrollLeft = sl - dx; });
+      addEventListener('pointerup', () => { if (!down) return; down = false; rail.style.scrollSnapType = ''; });
+      rail.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
     }
+  });
 
-    // rail jumps to that part of the hour
-    railBtns.forEach((b2, i) => {
-      b2.addEventListener('click', () => {
-        const target = steps[i];
-        if (!target) return;
-        const y = target.getBoundingClientRect().top + window.scrollY
-                  - Math.max(0, (window.innerHeight - target.offsetHeight) / 2);
-        if (lenis) lenis.scrollTo(y, { duration: 1 });
-        else window.scrollTo({ top: y, behavior: 'smooth' });
-      });
+  /* ------------------------------ Marquee pause (WCAG 2.2.2) */
+  $$('.marquee').forEach((m) => {
+    const b = $('.marquee__pause', m);
+    b && b.addEventListener('click', () => {
+      const p = m.classList.toggle('is-paused');
+      b.setAttribute('aria-label', p ? 'Play scrolling text' : 'Pause scrolling text');
+      b.textContent = p ? '▶' : '❚❚';
     });
-  }
+  });
 
-  /* ------------------------------ Headlines resolve character by character
-     Splits text nodes only, so <em> and <br> survive. <em> stays whole
-     because background-clip:text breaks the moment its letters get their
-     own transforms. */
-  if (!reduceMotion && 'IntersectionObserver' in window) {
-    const STEP = 17;   // ms between letters
-    const CAP = 620;   // never stagger longer than this
+  /* ------------------------------ Open now (gym is on US Central time) */
+  const HOURS = { 0: [], 1: [[300, 690], [1020, 1110]], 2: [[300, 690], [1020, 1110]], 3: [[300, 690], [1020, 1110]], 4: [[300, 690], [1020, 1110]], 5: [[300, 690]], 6: [[360, 600]] };
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60, ap = h >= 12 ? 'p' : 'a'; return `${((h + 11) % 12) + 1}${mm ? ':' + String(mm).padStart(2, '0') : ''}${ap}`; };
+  $$('[data-status]').forEach((el) => {
+    let now;
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+      const g = (t) => parts.find((p) => p.type === t).value;
+      now = { d: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(g('weekday')), m: (+g('hour') % 24) * 60 + +g('minute') };
+    } catch (e) { return; }
+    const open = HOURS[now.d].find(([a, b]) => now.m >= a && now.m < b);
+    const label = $('span', el);
+    if (open) { el.classList.add('is-open'); label.textContent = `Open now. Doors close at ${fmt(open[1])}.`; }
+    else {
+      let d = now.d, first = true, next = null;
+      for (let k = 0; k < 8 && !next; k++) {
+        const w = HOURS[d].find(([a]) => !first || a > now.m);
+        if (w) next = { d, m: w[0], k };
+        d = (d + 1) % 7; first = false;
+      }
+      if (next) label.textContent = `Closed right now. Next up: ${next.k === 0 ? 'today' : next.k === 1 ? 'tomorrow' : DAYS[next.d]} at ${fmt(next.m)}.`;
+    }
+    const row = $(`[data-day="${now.d}"]`);
+    row && row.classList.add('is-today');
+  });
 
-    const splitNode = (node, out, state) => {
-      if (node.nodeType === 3) {
-        node.textContent.split(/(\s+)/).forEach((part) => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) { out.appendChild(document.createTextNode(part)); return; }
-          const word = document.createElement('span');
-          word.className = 'sr-word';
-          [...part].forEach((ch) => {
-            const c = document.createElement('span');
-            c.className = 'sr-char';
-            c.style.setProperty('--d', Math.min(state.i * STEP, CAP) + 'ms');
-            c.textContent = ch;
-            state.i++;
-            word.appendChild(c);
-          });
-          out.appendChild(word);
-        });
-        return;
-      }
-      if (node.nodeType !== 1) return;
-      if (node.tagName === 'BR') { out.appendChild(node.cloneNode(false)); return; }
-      if (node.tagName === 'EM') {
-        const em = node.cloneNode(false);
-        em.className = (em.className ? em.className + ' ' : '') + 'sr-char';
-        em.style.setProperty('--d', Math.min(state.i * STEP, CAP) + 'ms');
-        em.textContent = node.textContent;
-        state.i += Math.max(3, Math.round(node.textContent.length / 2));
-        out.appendChild(em);
-        return;
-      }
-      const clone = node.cloneNode(false);
-      [...node.childNodes].forEach((k) => splitNode(k, clone, state));
-      out.appendChild(clone);
+  /* ------------------------------ Mission line lights up word by word */
+  const mission = $('[data-light]');
+  if (mission && !reduce) {
+    const parts = $$('.dim', mission);
+    const lio = new IntersectionObserver((ents) => ents.forEach((en) => {
+      if (!en.isIntersecting) return;
+      parts.forEach((p, i) => setTimeout(() => p.classList.add('lit'), i * 220));
+      lio.disconnect();
+    }), { threshold: 0.6 });
+    lio.observe(mission);
+  } else if (mission) $$('.dim', mission).forEach((p) => p.classList.add('lit'));
+
+  /* ------------------------------ Plan cards tilt toward the pointer */
+  if (fine && !reduce) $$('.plan').forEach((c) => {
+    c.addEventListener('pointermove', (e) => {
+      const r = c.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      c.style.setProperty('--tilt-y', (x * 7).toFixed(2) + 'deg');
+      c.style.setProperty('--tilt-x', (-y * 7).toFixed(2) + 'deg');
+    });
+    c.addEventListener('pointerleave', () => { c.style.setProperty('--tilt-x', '0deg'); c.style.setProperty('--tilt-y', '0deg'); });
+  });
+
+  /* ------------------------------ Footer wordmark letters */
+  $$('.footer__word').forEach((w) => {
+    const t = w.textContent; w.textContent = '';
+    w.setAttribute('aria-hidden', 'true');
+    [...t].forEach((ch) => { const s = document.createElement('span'); s.textContent = ch; w.appendChild(s); });
+  });
+
+  /* ------------------------------ Checkout drawer (PushPress inside the site) */
+  const dlg = $('#checkout');
+  if (dlg) {
+    const body = $('.checkout__body', dlg);
+    const title = $('.checkout__title', dlg), kicker = $('.checkout__kicker', dlg), note = $('.checkout__note', dlg), ext = $('[data-ext]', dlg);
+    let frameEl = null, opener = null, loadTimer = null;
+    const close = () => {
+      if (!dlg.open) return;
+      dlg.classList.add('is-closing');
+      setTimeout(() => {
+        dlg.classList.remove('is-closing'); dlg.close();
+        if (frameEl) { frameEl.remove(); frameEl = null; }
+        body.classList.remove('is-loaded');
+        document.body.style.overflow = ''; if (lenis) lenis.start();
+        opener && opener.focus();
+      }, reduce ? 0 : 330);
     };
-
-    const lit = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        e.target.classList.add('is-lit');
-        lit.unobserve(e.target);
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
-
-    document.querySelectorAll('h1, h2').forEach((h) => {
-      if (h.dataset.srDone || !h.textContent.trim()) return;
-      const label = h.textContent.replace(/\s+/g, ' ').trim();
-      const holder = document.createElement('span');
-      const state = { i: 0 };
-      [...h.childNodes].forEach((k) => splitNode(k, holder, state));
-      holder.setAttribute('aria-hidden', 'true');
-      h.setAttribute('aria-label', label);
-      h.textContent = '';
-      h.appendChild(holder);
-      h.dataset.srDone = '1';
-      h.dataset.rvSeen = '1';   // keep the generic reveal system off these
-      lit.observe(h);
+    const open = (key, btn) => {
+      const plan = PLANS[key];
+      if (!plan) return;
+      opener = btn;
+      title.textContent = plan.name;
+      kicker.textContent = `${plan.kicker} · ${plan.price}`;
+      note.textContent = plan.note;
+      ext.href = plan.url;
+      frameEl = document.createElement('iframe');
+      frameEl.title = `${plan.name} checkout, powered by PushPress`;
+      frameEl.src = plan.url;
+      frameEl.setAttribute('allow', 'payment');
+      frameEl.addEventListener('load', () => { body.classList.add('is-loaded'); clearTimeout(loadTimer); });
+      body.appendChild(frameEl);
+      // if PushPress is slow or blocked, the "open in a new tab" link is already on screen
+      loadTimer = setTimeout(() => body.classList.add('is-loaded'), 9000);
+      document.body.style.overflow = 'hidden'; if (lenis) lenis.stop();
+      dlg.showModal();
+      $('.checkout__close', dlg).focus();
+      track('checkout_open', { plan: key, price: plan.price });
+      if (key === 'trial') track('trial_click', { location: btn?.dataset.loc || location.pathname });
+    };
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest && e.target.closest('[data-plan]');
+      if (!b) return;
+      // tiny screens and anything without dialog support just go to PushPress
+      if (typeof dlg.showModal !== 'function') return;
+      e.preventDefault();
+      open(b.dataset.plan, b);
     });
+    $('.checkout__close', dlg).addEventListener('click', close);
+    dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
   }
-
-  /* ------------------------------ Reveal system (auto-tagged)
-     Tags elements at runtime so every page gets the same motion
-     vocabulary with zero markup churn. Never gates <main>. */
-  const RV_SKIP_SECTION = /\b(hero|hour__stage)\b/;
-  const RV_MOVING = '[class*="__rail"],[class*="__track"],[class*="__frames"],.hour__stage,.fsplit__media,.hero__media';
-  const tagged = [];
-
-  const tag = (el, delay) => {
-    if (el.dataset.rvSeen || el.hasAttribute('data-hero')) return;
-    // Anything sticky already has its own motion. Fading it in means you can
-    // see straight through it to the card underneath while it animates.
-    if (getComputedStyle(el).position === 'sticky') return;
-    el.dataset.rvSeen = '1';
-    el.setAttribute('data-rv', '');
-    if (delay) el.style.setProperty('--rv-d', delay.toFixed(2) + 's');
-    tagged.push(el);
-  };
-
-  document.querySelectorAll('main section').forEach((section) => {
-    if (RV_SKIP_SECTION.test(section.className)) return;
-    const roots = section.querySelectorAll(':scope > .wrap');
-    (roots.length ? roots : [section]).forEach((root) => {
-      [...root.children].forEach((child) => {
-        if (child.matches(RV_MOVING) || child.closest(RV_MOVING)) return;
-        const kids = [...child.children].filter((k) => k.tagName !== 'SCRIPT');
-        const groupy = /grid|__list|checks|offers|roster|doors__|tiers__|reviews__|contact__cards|hour__steps|btn-row/.test(child.className);
-        if (groupy && kids.length >= 2 && kids.length <= 10) {
-          kids.forEach((k, i) => tag(k, 0.09 * i));
-        } else {
-          tag(child, 0);
-        }
-      });
-    });
+  // every [data-plan] is a real link to PushPress, so it still works with JS off
+  $$('[data-plan]').forEach((b) => {
+    const p = PLANS[b.dataset.plan];
+    if (p && b.tagName === 'A') { b.href = p.url; b.target = '_blank'; b.rel = 'noopener'; }
   });
 
-  if ('IntersectionObserver' in window && !reduceMotion) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('is-in');
-          io.unobserve(e.target);
-        }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    tagged.forEach((el) => io.observe(el));
-  } else {
-    tagged.forEach((el) => el.classList.add('is-in'));
-  }
-
-  // Backstop: anything near the viewport gets revealed even if IO never fired
-  const sweep = () => {
-    tagged.forEach((el) => {
-      if (!el.classList.contains('is-in') && el.getBoundingClientRect().top < window.innerHeight * 1.2) {
-        el.classList.add('is-in');
-      }
-    });
-  };
-  setTimeout(sweep, 2500);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) sweep(); });
-  window.addEventListener('load', () => setTimeout(sweep, 700));
-
-  /* ------------------------------ FAQ accordion (state in the hash) */
-  const faqItems = [...document.querySelectorAll('.faq__item')];
-  faqItems.forEach((item, i) => {
-    item.id = item.id || 'faq-' + (i + 1);
-    const q = item.querySelector('.faq__q');
-    q.addEventListener('click', () => {
-      const open = item.classList.toggle('is-open');
-      q.setAttribute('aria-expanded', String(open));
-      faqItems.forEach((other) => {
-        if (other !== item) {
-          other.classList.remove('is-open');
-          other.querySelector('.faq__q').setAttribute('aria-expanded', 'false');
-        }
-      });
-      history.replaceState(null, '', open ? '#' + item.id : location.pathname);
-    });
-  });
-  if (location.hash && /^#faq-\d+$/.test(location.hash)) {
-    const item = document.querySelector(location.hash);
-    if (item && item.classList.contains('faq__item')) {
-      item.classList.add('is-open');
-      item.querySelector('.faq__q').setAttribute('aria-expanded', 'true');
-    }
-  }
-
-  /* ------------------------------ Preview notices (honest, inline, never alert()) */
-  const NOTE_BOOKING = 'Booking isn’t connected yet. This is a design preview, nothing was booked or charged.';
-  const NOTE_FORM = 'This form isn’t connected yet. This is a design preview, your message was not sent. Text or call 850-502-3454 instead.';
-
-  const showNote = (afterEl, text, inNav) => {
-    if (inNav) {
-      let toast = document.getElementById('ppToast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'ppToast';
-        toast.className = 'pp-note pp-note--toast';
-        document.body.appendChild(toast);
-      }
-      toast.textContent = text;
-      toast.classList.add('is-on');
-      clearTimeout(toast._t);
-      toast._t = setTimeout(() => toast.classList.remove('is-on'), 4500);
-      return;
-    }
-    let note = afterEl.nextElementSibling;
-    if (!note || !note.classList.contains('pp-note')) {
-      note = document.createElement('div');
-      note.className = 'pp-note';
-      note.setAttribute('role', 'status');
-      afterEl.insertAdjacentElement('afterend', note);
-    }
-    note.textContent = text;
-    note.classList.add('is-on');
-    clearTimeout(note._t);
-    note._t = setTimeout(() => note.classList.remove('is-on'), 6000);
-  };
-
-  document.querySelectorAll('.pp-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.pp;
-      const url = INTEGRATIONS.pushpress ? INTEGRATIONS.pushpress[key] : null;
-      if (url) {
-        window.open(url, '_blank', 'noopener');
-      } else {
-        showNote(btn, NOTE_BOOKING, !!btn.closest('.nav, .nav-drawer'));
-      }
-    });
-  });
-
-  /* ------------------------------ Contact form */
-  const form = document.getElementById('contactForm');
+  /* ------------------------------ Contact form -> /api/contact (Resend) */
+  const form = $('#contact-form');
   if (form) {
+    const status = $('.form__status', form);
+    const btn = $('button[type=submit]', form);
+    const pre = new URLSearchParams(location.search).get('topic');
+    if (pre) { const r = form.querySelector(`input[name=topic][value="${pre}"]`); if (r) r.checked = true; }
+    const setErr = (input, msg) => {
+      const id = input.id + '-err';
+      let el = document.getElementById(id);
+      if (!msg) { input.removeAttribute('aria-invalid'); el && el.remove(); return; }
+      input.setAttribute('aria-invalid', 'true');
+      if (!el) { el = document.createElement('p'); el.id = id; el.className = 'err'; input.after(el); input.setAttribute('aria-describedby', id); }
+      el.textContent = msg;
+    };
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      let ok = true;
-      form.querySelectorAll('.fld').forEach((fld) => {
-        const input = fld.querySelector('input, textarea');
-        const bad = !input.value.trim();
-        fld.classList.toggle('is-bad', bad);
-        if (bad) ok = false;
-      });
-      if (!ok) return;
-
-      const submitBtn = form.querySelector('[type="submit"]');
-      if (!INTEGRATIONS.form) {
-        showNote(submitBtn, NOTE_FORM, false);
-        return;
-      }
-      // Live endpoint path: POST and only claim success when it actually succeeded.
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Sending…';
+      status.className = 'form__status'; status.textContent = '';
+      const name = form.elements.name, email = form.elements.email, phone = form.elements.phone, msg = form.elements.message;
+      let bad = null;
+      setErr(name, name.value.trim() ? '' : 'Please add your name.'); if (!name.value.trim()) bad = bad || name;
+      const hasEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value.trim());
+      const hasPhone = phone.value.replace(/\D/g, '').length >= 10;
+      setErr(email, hasEmail || hasPhone ? '' : 'Add an email or a phone number so we can get back to you.');
+      if (!hasEmail && !hasPhone) bad = bad || email;
+      setErr(msg, msg.value.trim() ? '' : 'Tell us what is on your mind.'); if (!msg.value.trim()) bad = bad || msg;
+      if (bad) { bad.focus(); return; }
+      const topic = (form.querySelector('input[name=topic]:checked') || {}).value || 'Something else';
+      btn.setAttribute('aria-busy', 'true'); const label = btn.innerHTML; btn.textContent = 'Sending…';
       try {
-        const res = await fetch(INTEGRATIONS.form, {
-          method: 'POST',
-          headers: { Accept: 'application/json' },
-          body: new FormData(form),
+        const r = await fetch('/api/contact', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.value, email: email.value, phone: phone.value, topic, message: msg.value, company: form.elements.company.value, page: location.pathname }),
         });
-        if (!res.ok) throw new Error('bad status');
-        submitBtn.textContent = 'Sent. Talk soon.';
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || 'send_failed');
+        status.className = 'form__status is-ok';
+        status.textContent = `Got it, ${name.value.trim().split(' ')[0]}. A real person will get back to you soon. If it is urgent, text 850-502-3454.`;
         form.reset();
+        track('generate_lead', { topic });
       } catch (err) {
-        showNote(submitBtn, 'That didn’t go through. Text us instead: 850-502-3454.', false);
-        submitBtn.textContent = 'Send it';
+        status.className = 'form__status is-err';
+        status.innerHTML = 'That did not send. Please text us at <a href="sms:+18505023454">850-502-3454</a> or email <a href="mailto:info@momentum.fit">info@momentum.fit</a> instead.';
       } finally {
-        submitBtn.disabled = false;
+        btn.removeAttribute('aria-busy'); btn.innerHTML = label;
+        status.focus();
       }
     });
   }
