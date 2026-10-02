@@ -361,6 +361,19 @@ const PLANS = {
     }, { threshold: .6 }).observe(w);
   });
 
+  /* ------------------------------ Price board: numbers count up when they come into view */
+  const counts = $$('[data-count]');
+  if (counts.length && !reduce && 'IntersectionObserver' in window) {
+    const cio = new IntersectionObserver((ents) => ents.forEach((e) => {
+      if (!e.isIntersecting) return;
+      cio.unobserve(e.target);
+      const el = e.target, to = +el.dataset.count, t0 = performance.now(), dur = 1100;
+      const step = (t) => { const k = Math.min((t - t0) / dur, 1); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }), { threshold: .6 });
+    counts.forEach((c) => cio.observe(c));
+  }
+
   /* ------------------------------ Sunset cursor: blob that streaks with speed, becomes a labeled pill on buttons */
   if (fine) {
     const cur = document.createElement('div');

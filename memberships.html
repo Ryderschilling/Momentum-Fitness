@@ -22,13 +22,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preload" href="/fonts/bigshoulders.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/publicsans.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/img/p/group-a.webp" as="image" fetchpriority="high">
-<link rel="stylesheet" href="/css/style.css?v=20261001b">
+<link rel="preload" href="/img/p/whiteboard.webp" as="image" fetchpriority="high">
+<link rel="stylesheet" href="/css/style.css?v=20261001c">
 <script>
 document.documentElement.classList.replace('no-js','js');
 try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('is-entering');sessionStorage.removeItem('mf-nav');}catch(e){}
 </script>
-<script src="/js/tag.js?v=20261001b"></script>
+<script src="/js/tag.js?v=20261001c"></script>
 <script async src="https://pulse.ryderschilling.com/p.js" data-site="ps_momentum"></script>
 <script type="application/ld+json">
 {
@@ -203,7 +203,7 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="nav" id="nav">
+<header class="nav nav--over" id="nav">
 <div class="wrap wrap--wide nav__inner">
 <a href="/" class="nav__logo" aria-label="Momentum Fitness, 30A CrossFit, home">
 <img class="logo--dark" src="/img/logo.webp" alt="" width="580" height="326">
@@ -238,7 +238,8 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 </div>
 </div>
 <main id="main" tabindex="-1">
-<section class="phero" aria-labelledby="ph-h">
+<section class="phero phero--board on-dark" aria-labelledby="ph-h">
+<img class="phero__bg" src="/img/p/whiteboard.webp" srcset="/img/p/whiteboard-700.webp 700w, /img/p/whiteboard.webp 1200w" sizes="100vw" alt="" width="1200" height="900" fetchpriority="high">
 <div class="wrap phero__grid">
 <div>
 <span class="eyebrow">Memberships</span>
@@ -246,7 +247,14 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 <p class="lead">Every membership gets you a coach in every class, workouts that scale to wherever you are, and a room full of people who will cheer when you finish. Pick the one that fits your life.</p>
 <div class="btn-row" style="margin-top:2rem"><a class="btn btn--solid" href="#plans">See plans</a><a class="btn btn--line" href="#trial" data-plan="trial" data-loc="memberships-hero">Try a class free</a></div>
 </div>
-<div class="phero__media"><img src="/img/p/group-a.webp" srcset="/img/p/group-a-700.webp 700w, /img/p/group-a.webp 1200w" sizes="(max-width: 900px) 100vw, 45vw" alt="A full class posing together on the gym floor" width="1200" height="906" fetchpriority="high"></div>
+<div class="board" role="list" aria-label="Price board">
+<div class="board__head"><span>The board</span><span>Prices per month unless noted</span></div>
+<a class="board__row rv" role="listitem" href="#plans" data-cursor="See plan" style="--d:80ms"><span class="board__name">Unlimited<small>Every class, every day we&rsquo;re open</small></span><span class="board__dots" aria-hidden="true"></span><span class="board__price"><sup>$</sup><b data-count="189">189</b></span></a>
+<a class="board__row rv" role="listitem" href="#plans" data-cursor="See plan" style="--d:160ms"><span class="board__name">Sessions Pack<small>30 sessions, use them within 4 months</small></span><span class="board__dots" aria-hidden="true"></span><span class="board__price"><sup>$</sup><b data-count="530">530</b><small>/pack</small></span></a>
+<a class="board__row rv" role="listitem" href="#plans" data-cursor="See plan" style="--d:240ms"><span class="board__name">Military &amp; First Responders<small>Unlimited, with our thanks</small></span><span class="board__dots" aria-hidden="true"></span><span class="board__price"><sup>$</sup><b data-count="160">160</b></span></a>
+<a class="board__row rv" role="listitem" href="#plans" data-cursor="See plan" style="--d:320ms"><span class="board__name">Family Add-On<small>Unlimited for each extra family member</small></span><span class="board__dots" aria-hidden="true"></span><span class="board__price"><sup>$</sup><b data-count="150">150</b></span></a>
+<a class="board__row board__row--free rv" role="listitem" href="#trial" data-plan="trial" data-loc="memberships-board" style="--d:400ms"><span class="board__name">Your first class<small>We&rsquo;ll reach out to set it up</small></span><span class="board__dots" aria-hidden="true"></span><span class="board__price">Free</span></a>
+</div>
 </div>
 </section>
 
@@ -436,6 +444,6 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 </div>
 </dialog>
 <script src="/js/vendor/lenis.min.js" defer></script>
-<script src="/js/main.js?v=20261001b" defer></script>
+<script src="/js/main.js?v=20261001c" defer></script>
 </body>
 </html>
