@@ -352,7 +352,13 @@ const PLANS = {
   $$('.footer__word').forEach((w) => {
     const t = w.textContent; w.textContent = '';
     w.setAttribute('aria-hidden', 'true');
-    [...t].forEach((ch) => { const s = document.createElement('span'); s.textContent = ch; w.appendChild(s); });
+    [...t].forEach((ch, i) => { const s = document.createElement('span'); s.textContent = ch; s.style.setProperty('--i', i); w.appendChild(s); });
+    if (reduce || !('IntersectionObserver' in window)) return;
+    // wave runs every time the footer comes into view, hover still works after it ends
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { w.classList.remove('is-wave'); void w.offsetWidth; w.classList.add('is-wave'); }
+      else w.classList.remove('is-wave');
+    }, { threshold: .6 }).observe(w);
   });
 
   /* ------------------------------ Checkout drawer (PushPress inside the site) */

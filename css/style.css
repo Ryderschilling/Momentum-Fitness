@@ -574,6 +574,14 @@ section { position: relative; }
 .footer__word { font: 900 clamp(4rem, 17.5vw, 19rem)/.78 var(--display); text-transform: uppercase; letter-spacing: -.01em; margin-top: clamp(3rem, 6vw, 5rem); white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.22); text-align: center; user-select: none; transition: -webkit-text-stroke-color .6s; }
 .footer__word span { display: inline-block; transition: color .5s var(--ease), transform .5s var(--ease); }
 .footer__word span:hover { color: #FF5C77; transform: translateY(-.06em); }
+/* wave on arrival: each letter does the hover pop, left to right, then settles */
+.footer__word.is-wave span { animation: wordWave .9s var(--ease) backwards; animation-delay: calc(var(--i) * 75ms); }
+@keyframes wordWave {
+  0%   { color: transparent; transform: none; }
+  35%  { color: #FF5C77; transform: translateY(-.06em); }
+  100% { color: transparent; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .footer__word.is-wave span { animation: none; } }
 .footer__bottom { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: 1.4rem 0 2rem; border-top: 1px solid var(--border); font-size: .85rem; color: var(--txt-3); }
 .footer__bottom a { color: var(--txt-2); }
 
