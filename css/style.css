@@ -742,3 +742,15 @@ section { position: relative; }
 .plan { display: flex; flex-direction: column; }
 .plan .btn { margin-top: auto; }
 .plan ul { margin-bottom: .6rem; }
+
+/* ------------------------------ Sunset cursor (desktop pointer only, added by main.js) */
+html.cur-on, html.cur-on * { cursor: none !important; }
+html.cur-on input, html.cur-on textarea, html.cur-on select, html.cur-on iframe, html.cur-on [contenteditable] { cursor: auto !important; }
+.sun-cur { position: fixed; left: 0; top: 0; z-index: 9999; pointer-events: none; width: 0; height: 0; opacity: 0; transition: opacity .25s; will-change: transform; }
+.sun-cur.is-on { opacity: 1; }
+.sun-cur__blob { position: absolute; left: 0; top: 0; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 999px; background: var(--sunset); box-shadow: 0 0 22px rgba(240, 60, 87, .45); display: grid; place-items: center; overflow: hidden; transition: width .4s var(--ease), height .4s var(--ease), margin .4s var(--ease), opacity .2s; }
+.sun-cur__blob span { font: 700 .66rem/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: #fff; white-space: nowrap; opacity: 0; transition: opacity .18s; }
+.sun-cur.is-link .sun-cur__blob { width: 12px; height: 12px; margin: -6px 0 0 -6px; }
+.sun-cur.is-pill .sun-cur__blob { width: var(--pw, 96px); height: 38px; margin: -19px 0 0 calc(var(--pw, 96px) / -2); }
+.sun-cur.is-pill .sun-cur__blob span { opacity: 1; transition-delay: .12s; }
+.sun-cur.is-field .sun-cur__blob { opacity: 0; }

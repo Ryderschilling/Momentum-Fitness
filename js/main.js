@@ -361,6 +361,71 @@ const PLANS = {
     }, { threshold: .6 }).observe(w);
   });
 
+  /* ------------------------------ Sunset cursor: blob that streaks with speed, becomes a labeled pill on buttons */
+  if (fine) {
+    const cur = document.createElement('div');
+    cur.className = 'sun-cur'; cur.setAttribute('aria-hidden', 'true');
+    cur.innerHTML = '<div class="sun-cur__blob"><span></span></div>';
+    document.body.appendChild(cur);
+    const blob = cur.firstChild, lab = blob.firstChild;
+    doc.classList.add('cur-on');
+    const PILL = '.btn, [data-plan], [data-cursor], summary, .nav__cta';
+    const labelFor = (el) => {
+      if (el.dataset.cursor) return el.dataset.cursor;
+      if (el.matches('summary')) return el.parentElement.open ? 'Close' : 'Open';
+      if (el.dataset.plan === 'trial') return 'Try free';
+      if (el.dataset.plan) return 'Join';
+      const h = el.getAttribute('href') || '';
+      if (h.startsWith('tel:')) return 'Call';
+      if (h.startsWith('sms:')) return 'Text';
+      if (h.startsWith('mailto:')) return 'Email';
+      if (/maps\./.test(h)) return 'Directions';
+      if (el.target === '_blank') return 'Open';
+      return 'Go';
+    };
+    const p = { x: -100, y: -100, lx: -100, ly: -100, sp: 0, ax: -100, ay: -100 };
+    let seen = false, under = null, dirty = false;
+    const read = (t) => {
+      if (!t || !t.closest) return;
+      const field = t.closest('input, textarea, select, iframe, [contenteditable]');
+      const pill = !field && t.closest(PILL);
+      const link = !field && !pill && t.closest('a, button, label, [role="button"]');
+      cur.classList.toggle('is-field', !!field);
+      cur.classList.toggle('is-link', !!link);
+      cur.classList.toggle('is-pill', !!pill);
+      if (pill && pill !== under) {
+        lab.textContent = labelFor(pill);
+        cur.style.setProperty('--pw', Math.max(78, lab.textContent.length * 9 + 44) + 'px');
+      }
+      under = pill || null;
+    };
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      p.x = e.clientX; p.y = e.clientY;
+      if (!seen) { seen = true; p.ax = p.lx = p.x; p.ay = p.ly = p.y; }
+      cur.classList.add('is-on');
+      read(e.target);
+    }, { passive: true });
+    // scrolling moves the page under a still mouse, so re-check what is under it
+    addEventListener('scroll', () => { dirty = true; }, { passive: true });
+    addEventListener('click', () => { dirty = true; });
+    document.addEventListener('mouseout', (e) => { if (!e.relatedTarget) cur.classList.remove('is-on'); });
+    const loop = () => {
+      const modal = document.querySelector('dialog[open]');
+      doc.classList.toggle('cur-on', !modal);
+      if (modal) cur.classList.remove('is-on');
+      if (dirty && seen) { dirty = false; under = null; read(document.elementFromPoint(p.x, p.y)); }
+      const vx = p.x - p.lx, vy = p.y - p.ly; p.lx = p.x; p.ly = p.y;
+      p.sp += (Math.hypot(vx, vy) - p.sp) * .2;
+      p.ax += (p.x - p.ax) * .22; p.ay += (p.y - p.ay) * .22;
+      cur.style.transform = `translate(${p.ax}px,${p.ay}px)`;
+      const str = (reduce || under || cur.classList.contains('is-link')) ? 1 : 1 + Math.min(p.sp / 22, 1.6);
+      blob.style.transform = str > 1.04 ? `rotate(${Math.atan2(vy, vx)}rad) scale(${str},${1 / Math.sqrt(str)})` : 'none';
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+
   /* ------------------------------ Checkout drawer (PushPress inside the site) */
   const dlg = $('#checkout');
   if (dlg) {
