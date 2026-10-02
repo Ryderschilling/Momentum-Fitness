@@ -23,12 +23,12 @@
 <link rel="preload" href="/fonts/bigshoulders.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/publicsans.woff2" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="/css/style.css?v=20261001d">
+<link rel="stylesheet" href="/css/style.css?v=20261001e">
 <script>
 document.documentElement.classList.replace('no-js','js');
 try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('is-entering');sessionStorage.removeItem('mf-nav');}catch(e){}
 </script>
-<script src="/js/tag.js?v=20261001d"></script>
+<script src="/js/tag.js?v=20261001e"></script>
 <script async src="https://pulse.ryderschilling.com/p.js" data-site="ps_momentum"></script>
 <script type="application/ld+json">
 {
@@ -201,38 +201,45 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 </div>
 </div>
 <main id="main" tabindex="-1">
-<section class="phero phero--call" aria-labelledby="ph-h">
+<section class="ctop" aria-labelledby="ph-h">
 <div class="wrap">
+<header class="ctop__head">
 <span class="eyebrow">Contact</span>
-<h1 id="ph-h" data-split style="margin-top:1.2rem">Say hi. <em>We don&rsquo;t bite.</em></h1>
-<p class="lead" style="margin-top:1.5rem;max-width:46ch">Texting is the fastest way to reach us. Tap the number and a real person texts you back.</p>
-<a class="callnum" href="sms:+18505023454" data-cursor="Text us" aria-label="Text us at 850-502-3454"><span>850</span><span>502</span><span>3454</span></a>
-<div class="callrow">
-<p class="status" data-status role="status"><i aria-hidden="true"></i><span>Mornings every day but Sunday, evenings Monday to Thursday.</span></p>
-<div class="callrow__chips"><a class="chip-link" href="tel:+18505023454">Call</a><a class="chip-link" href="mailto:info@momentum.fit">Email</a><a class="chip-link" href="https://maps.google.com/?q=Momentum+Fitness+30A+CrossFit+170+Serenoa+Rd+Santa+Rosa+Beach+FL" target="_blank" rel="noopener">Directions</a></div>
-</div>
-</div>
-</section>
-
-<section class="pad" style="padding-top:1.4rem" aria-label="Send a message">
-<div class="wrap contact__grid">
+<h1 id="ph-h" data-split>Say hi. <em>We don&rsquo;t bite.</em></h1>
+<p class="lead">Send a note below, or just text us. A real person gets back to you.</p>
+</header>
+<div class="ctop__grid">
+<div class="ctop__card">
 <form class="form" id="contact-form" novalidate>
-<fieldset class="field chips"><legend>What&rsquo;s this about?</legend><label><input type="radio" name="topic" value="Free trial" checked><span>Free trial</span></label><label><input type="radio" name="topic" value="Drop-in"><span>Drop-in</span></label><label><input type="radio" name="topic" value="Membership"><span>Membership</span></label><label><input type="radio" name="topic" value="Private coaching"><span>Private coaching</span></label><label><input type="radio" name="topic" value="Something else"><span>Something else</span></label></fieldset>
+<fieldset class="field chips"><legend>What&rsquo;s this about?</legend><label><input type="radio" name="topic" value="Free trial" checked><span>Free trial</span></label><label><input type="radio" name="topic" value="Drop-in"><span>Drop-in</span></label><label><input type="radio" name="topic" value="Membership"><span>Membership</span></label><label><input type="radio" name="topic" value="Private coaching"><span>Coaching</span></label><label><input type="radio" name="topic" value="Something else"><span>Other</span></label></fieldset>
 <div class="form__row">
 <div class="field"><label for="f-name">Name</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
 <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email"></div>
 </div>
-<div class="field"><label for="f-phone">Phone <span class="opt">(optional, if you&rsquo;d rather we text you)</span></label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
+<div class="field"><label for="f-phone">Phone <span class="opt">(optional)</span></label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
 <div class="field"><label for="f-msg">Message</label><textarea id="f-msg" name="message" required></textarea></div>
 <div class="hp" aria-hidden="true"><label for="f-co">Company</label><input id="f-co" name="company" type="text" tabindex="-1" autocomplete="off"></div>
 <p class="form__status" role="status" tabindex="-1"></p>
 <div><button class="btn btn--solid" type="submit">Send message <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1 8h13M9 3l5 5-5 5" stroke="currentColor" stroke-width="2"/></svg></button></div>
 </form>
-<div class="reach">
-<a class="card" href="sms:+18505023454"><span>Fastest</span><b>Text 850-502-3454</b></a>
-<a class="card" href="tel:+18505023454"><span>Call</span><b>850-502-3454</b></a>
-<a class="card" href="mailto:info@momentum.fit"><span>Email</span><b class="lc">info@momentum.fit</b></a>
-<a class="card" href="https://maps.google.com/?q=Momentum+Fitness+30A+CrossFit+170+Serenoa+Rd+Santa+Rosa+Beach+FL" target="_blank" rel="noopener"><span>Visit</span><b>170 Serenoa Rd, Bay 3</b><em style="font-style:normal;color:var(--txt-2)">Santa Rosa Beach, FL 32459</em></a>
+</div>
+<aside class="cinfo" aria-label="Other ways to reach us">
+<div class="cinfo__item">
+<span class="cinfo__k">Text or call</span>
+<a class="cinfo__big" href="sms:+18505023454" data-cursor="Text us">850-502-3454</a>
+<div class="cinfo__btns"><a class="chip-link" href="sms:+18505023454">Text</a><a class="chip-link" href="tel:+18505023454">Call</a></div>
+</div>
+<div class="cinfo__item">
+<span class="cinfo__k">Email</span>
+<a class="cinfo__v" href="mailto:info@momentum.fit">info@momentum.fit</a>
+</div>
+<div class="cinfo__item">
+<span class="cinfo__k">Visit</span>
+<p class="cinfo__v">170 Serenoa Rd, Bay 3<br>Santa Rosa Beach, FL 32459</p>
+<a class="cinfo__link" href="https://maps.google.com/?q=Momentum+Fitness+30A+CrossFit+170+Serenoa+Rd+Santa+Rosa+Beach+FL" target="_blank" rel="noopener">Get directions</a>
+</div>
+<p class="status" data-status role="status"><i aria-hidden="true"></i><span>Mornings every day but Sunday, evenings Monday to Thursday.</span></p>
+</aside>
 </div>
 </div>
 </section>
@@ -324,6 +331,6 @@ try{if(sessionStorage.getItem('mf-nav')==='1'&&!matchMedia('(prefers-reduced-mot
 </div>
 </dialog>
 <script src="/js/vendor/lenis.min.js" defer></script>
-<script src="/js/main.js?v=20261001d" defer></script>
+<script src="/js/main.js?v=20261001e" defer></script>
 </body>
 </html>

@@ -850,3 +850,29 @@ html.cur-on input, html.cur-on textarea, html.cur-on select, html.cur-on iframe,
   .phero--call .callrow { grid-column: 1 / -1; margin-top: 1.1rem; }
 }
 #contact-form .field textarea { min-height: 110px; }
+
+/* ------------------------------ Contact v2: one clean screen, form + one info column */
+.ctop { padding: calc(var(--nav-h) + clamp(2rem, 4vw, 3rem)) 0 clamp(3rem, 6vw, 5rem); }
+.ctop__head h1 { font-size: clamp(2.6rem, 4.6vw, 4.4rem); margin-top: .9rem; }
+.ctop__head .lead { margin-top: .7rem; max-width: 52ch; font-size: clamp(1rem, 1.2vw, 1.12rem); }
+.ctop__grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; margin-top: clamp(1.6rem, 3vw, 2.4rem); }
+.ctop__card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: clamp(1.3rem, 2.4vw, 2rem); box-shadow: 0 24px 50px -36px rgba(20,21,25,.35); }
+.ctop__card .form { gap: 1rem; }
+.ctop__card .chips { gap: .4rem; }
+.ctop__card .chips span { padding: .5rem .9rem; font-size: .8rem; min-height: 40px; }
+.ctop__card #contact-form .field textarea { min-height: 120px; }
+.ctop__card .form button[type=submit] { width: 100%; justify-content: center; }
+.cinfo { display: grid; align-content: start; }
+.cinfo__item { padding: 1.3rem 0; border-bottom: 1px solid var(--border); display: grid; gap: .45rem; }
+.cinfo__item:first-child { padding-top: .4rem; }
+.cinfo__k { font: 700 .7rem/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--accent-txt); }
+.cinfo__big { font: 800 clamp(1.9rem, 2.8vw, 2.5rem)/1 var(--display); text-decoration: none; letter-spacing: .01em; width: fit-content; transition: color .25s; }
+.cinfo__big:hover { color: var(--accent); }
+.cinfo__btns { display: flex; gap: .45rem; margin-top: .35rem; }
+.cinfo__btns .chip-link { padding: .55rem 1rem; font-size: .72rem; }
+.cinfo__v { font-weight: 600; color: var(--txt); text-decoration: none; width: fit-content; line-height: 1.5; }
+a.cinfo__v:hover { color: var(--accent); }
+.cinfo__link { font-weight: 700; font-size: .9rem; color: var(--accent-txt); width: fit-content; }
+.cinfo .status { margin-top: 1.3rem; font-size: .9rem; width: fit-content; }
+@media (max-width: 900px) { .ctop__grid { grid-template-columns: 1fr; } }
+@media (min-width: 901px) and (min-height: 760px) { .ctop { min-height: 100svh; } }
