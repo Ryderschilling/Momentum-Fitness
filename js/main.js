@@ -21,12 +21,12 @@ const PLANS = {
   },
   'dropin-week': {
     name: 'Unlimited week pass', price: '$85', kicker: 'Drop-in',
-    note: 'Every class for 7 days. Checkout is handled by PushPress, our booking system.',
+    note: 'Every class for 7 days in a row, starting the day you buy (we are closed Sundays). After checkout, book your classes in the Momentum Fitness 30A app.',
     url: 'https://momentumfitness.pushpress.com/landing/plans/plan_b5c8d1a3876345',
   },
   'dropin-month': {
     name: '1-month unlimited drop-in', price: '$189', kicker: 'Drop-in',
-    note: 'Every class for a month. Does not auto-renew.',
+    note: 'Every class for a month. Does not auto-renew. After checkout, book your classes in the Momentum Fitness 30A app.',
     url: 'https://momentumfitness.pushpress.com/landing/plans/plan_f14a1055d6a743',
   },
   'membership-unlimited': {
@@ -299,7 +299,7 @@ const PLANS = {
   });
 
   /* ------------------------------ Open now (gym is on US Central time) */
-  const HOURS = { 0: [], 1: [[300, 690], [1020, 1110]], 2: [[300, 690], [1020, 1110]], 3: [[300, 690], [1020, 1110]], 4: [[300, 690], [1020, 1110]], 5: [[300, 690]], 6: [[360, 600]] };
+  const HOURS = { 0: [], 1: [[300, 690], [1020, 1110]], 2: [[300, 690], [1020, 1110]], 3: [[300, 690], [1020, 1110]], 4: [[300, 690], [1020, 1110]], 5: [[300, 690]], 6: [[450, 600]] };
   const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const fmt = (m) => { const h = Math.floor(m / 60), mm = m % 60, ap = h >= 12 ? 'p' : 'a'; return `${((h + 11) % 12) + 1}${mm ? ':' + String(mm).padStart(2, '0') : ''}${ap}`; };
   $$('[data-status]').forEach((el) => {

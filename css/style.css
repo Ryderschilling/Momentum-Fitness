@@ -902,3 +902,11 @@ a.cinfo__v:hover { color: var(--accent); }
 .ctop::after { background: radial-gradient(circle, rgba(178,59,166,.5), rgba(69,81,181,.35) 50%, transparent 70%); }
 .cinfo .status { font-size: .85rem; padding: .6rem .9rem; background: rgba(255,255,255,.6); border: 1px solid rgba(21,22,27,.08); border-radius: 999px; }
 .cinfo .status { border-radius: 14px; }
+
+/* 10-02 client round: drop-in class schedule + app note */
+.plan__app { font-size: .88rem; color: var(--txt-3); margin-top: -.2rem; margin-bottom: .9rem; }
+.hours--sched td { text-align: right; }
+.sched { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+.sched li { color: var(--txt-2); font-size: .95rem; }
+.sched b { color: var(--txt); font-weight: 700; margin-right: .35rem; }
+@media (max-width: 600px) { .sched li { font-size: .88rem; } }
